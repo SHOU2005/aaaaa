@@ -16,6 +16,7 @@ import { MembersPage }      from './pages/MembersPage';
 import { PostDetailPage }   from './pages/PostDetailPage';
 import { ComposePage }      from './pages/ComposePage';
 import { ProfilePage }      from './pages/ProfilePage';
+import { ProfileEditPage }  from './pages/ProfileEditPage';
 import { CommunityJoinPage } from './pages/CommunityJoinPage';
 
 function RequireOnboard({ children }: { children: React.ReactNode }) {
@@ -49,7 +50,7 @@ export function App() {
 
           <Route path="/profile"          element={<RequireOnboard><ProfilePage /></RequireOnboard>} />
           <Route path="/profile/:memberId" element={<RequireOnboard><ProfilePage /></RequireOnboard>} />
-          <Route path="/profile/edit"     element={<RequireOnboard><ProfilePage /></RequireOnboard>} />
+          <Route path="/profile/edit"     element={<RequireOnboard><ProfileEditPage /></RequireOnboard>} />
 
           <Route path="*" element={<Navigate to="/home" replace />} />
         </Routes>

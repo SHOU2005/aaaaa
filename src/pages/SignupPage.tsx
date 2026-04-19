@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { saveWorker, setOnboarded, generateRegNumber, getWorker } from '../data/store';
 import { useLang } from '../i18n/useT';
@@ -21,8 +21,9 @@ const JOB_TYPES = [
 
 // Static meta — titles are derived inside component from t()
 const STEPS_META_KEYS = [
-  { titleKey: 'signup.langTitle',  subKey: 'signup.langSub' },
+  { titleKey: 'signup.langTitle',   subKey: 'signup.langSub' },
   { titleKey: 'signup.step1.title', subKey: 'signup.step1.sub' },
+  { titleKey: 'signup.otpTitle',    subKey: 'signup.otpSub' },
   { titleKey: 'signup.step2.title', subKey: 'signup.step2.sub' },
   { titleKey: 'signup.step3.title', subKey: 'signup.step3.sub' },
 ] as const;
@@ -57,17 +58,42 @@ export function SignupPage() {
   const [step,   setStep]  = useState(0);
   const [name,   setName]  = useState('');
   const [mobile, setMobile]= useState('');
+  const [otp,    setOtp]   = useState(['', '', '', '', '', '']);
+  const [otpSent, setOtpSent] = useState(false);
   const [types,  setTypes] = useState<string[]>([]);
   const [photo,  setPhoto] = useState(false);
   const { lang, setLang, t } = useLang();
   const navigate = useNavigate();
+  const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
   // Translate step titles reactively
-  const stepsLabels = STEPS_META_KEYS.map(k => ({ title: t(k.titleKey), sub: t(k.subKey) }));
+  const stepsLabels = STEPS_META_KEYS.map(k => ({
+    title: k.titleKey === 'signup.otpTitle'  ? 'OTP Verify करें' :
+           k.titleKey === 'signup.langTitle'  ? t(k.titleKey as any) :
+           t(k.titleKey as any),
+    sub:   k.subKey   === 'signup.otpSub'    ? `+91 ${mobile} पर OTP भेजा गया` :
+           t(k.subKey as any),
+  }));
 
-  const next = () => setStep(s => s + 1);
+  const next = () => {
+    if (step === 1 && !otpSent) {
+      // Simulate sending OTP
+      setOtpSent(true);
+      setTimeout(() => otpRefs.current[0]?.focus(), 100);
+    }
+    setStep(s => s + 1);
+  };
   const back = () => setStep(s => s - 1);
   const toggleType = (id: string) =>
     setTypes(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+
+  const handleOtpChange = (i: number, val: string) => {
+    const d = val.replace(/\D/g, '').slice(-1);
+    const next = [...otp]; next[i] = d; setOtp(next);
+    if (d && i < 5) otpRefs.current[i + 1]?.focus();
+  };
+  const handleOtpKey = (i: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Backspace' && !otp[i] && i > 0) otpRefs.current[i - 1]?.focus();
+  };
 
   const finish = () => {
     const base = getWorker();
@@ -76,7 +102,7 @@ export function SignupPage() {
       name: name || 'Worker',
       mobile: mobile || '9999999999',
       jobTypes: types, skills: types,
-      language: lang,    // already updated in context
+      language: lang,
       isVerified: photo,
       regNumber: generateRegNumber(),
     });
@@ -87,8 +113,9 @@ export function SignupPage() {
   const primary  = '#1B6B3A';
   const canNext0 = true;
   const canNext1 = name.trim().length >= 2 && mobile.length === 10;
-  const canNext2 = types.length > 0;
-  const canNext  = [canNext0, canNext1, canNext2, true][step];
+  const canNext2 = otp.join('').length >= 4; // OTP verify (simulated: any 4+ digits)
+  const canNext3 = types.length > 0;
+  const canNext  = [canNext0, canNext1, canNext2, canNext3, true][step];
 
   return (
     <div style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column', background: '#F7F8F5' }}>
@@ -202,8 +229,50 @@ export function SignupPage() {
           </div>
         )}
 
-        {/* ─ Step 2: Job types ─ */}
+        {/* ─ Step 2: OTP ─ */}
         {step === 2 && (
+          <div>
+            <div style={{ background: '#F0FDF4', borderRadius: 14, padding: '12px 16px', marginBottom: 20, border: '1px solid #A7F3D0', display: 'flex', gap: 10, alignItems: 'center' }}>
+              <span style={{ fontSize: 20 }}>📱</span>
+              <div style={{ fontSize: 13, color: '#1B6B3A', fontWeight: 600 }}>
+                +91 {mobile} पर OTP भेजा गया
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginBottom: 24 }}>
+              {otp.map((digit, i) => (
+                <input
+                  key={i}
+                  ref={el => { otpRefs.current[i] = el; }}
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={1}
+                  value={digit}
+                  onChange={e => handleOtpChange(i, e.target.value)}
+                  onKeyDown={e => handleOtpKey(i, e)}
+                  style={{
+                    width: 46, height: 56, textAlign: 'center',
+                    border: `2px solid ${digit ? primary : '#E8EAE5'}`,
+                    borderRadius: 12, fontSize: 22, fontWeight: 800, color: primary,
+                    background: digit ? '#ECFDF5' : '#F7F8F5',
+                    outline: 'none', fontFamily: 'Baloo 2',
+                    transition: 'all 0.15s',
+                  }}
+                  onFocus={e => (e.target.style.borderColor = primary)}
+                  onBlur={e => (e.target.style.borderColor = digit ? primary : '#E8EAE5')}
+                />
+              ))}
+            </div>
+            <div style={{ textAlign: 'center', fontSize: 13, color: '#9CA3AF', marginBottom: 8 }}>
+              OTP नहीं आया?{' '}
+              <span style={{ color: primary, fontWeight: 700, cursor: 'pointer' }} onClick={() => {}}>
+                Resend करें
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* ─ Step 3: Job types ─ */}
+        {step === 3 && (
           <div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 8 }}>
               {JOB_TYPES.map(jt => {
@@ -237,8 +306,8 @@ export function SignupPage() {
           </div>
         )}
 
-        {/* ─ Step 3: Verification ─ */}
-        {step === 3 && (
+        {/* ─ Step 4: Verification ─ */}
+        {step === 4 && (
           <div>
             {/* Benefits */}
             <div style={{ background: '#ECFDF5', borderRadius: 14, padding: '16px', marginBottom: 20, border: '1px solid #A7F3D0' }}>
@@ -284,7 +353,7 @@ export function SignupPage() {
 
         {/* ─ Primary action button ─ */}
         <button
-          onClick={step === stepsLabels.length - 1 ? finish : next}
+          onClick={step === 4 ? finish : next}
           disabled={!canNext}
           style={{
             width: '100%', height: 52, borderRadius: 14, marginTop: 8,
@@ -294,7 +363,7 @@ export function SignupPage() {
             boxShadow: canNext ? `0 4px 16px rgba(27,107,58,0.3)` : 'none',
             transition: 'all 0.2s',
           }}>
-          {step === stepsLabels.length - 1
+          {step === 4
             ? (photo ? t('signup.createAccount') : t('signup.skipContinue'))
             : t('common.continue')}
         </button>

@@ -63,11 +63,6 @@ export function HomePage() {
 
   const nameInitials = worker.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
 
-  // Max salary in nearby jobs for the subtitle
-  const maxSalary = allJobs.length
-    ? Math.max(...allJobs.map(j => j.salary.max))
-    : 0;
-
   return (
     <div style={{ paddingBottom: 'calc(var(--nav-h) + var(--bot-pad) + 12px)', background: '#F5F6F2', minHeight: '100dvh' }}>
 
@@ -82,11 +77,11 @@ export function HomePage() {
             position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)',
             width: '100%', maxWidth: 430, zIndex: 901,
             background: '#fff', borderRadius: '24px 24px 0 0',
-            padding: '8px 24px 40px',
+            padding: `8px 20px calc(40px + env(safe-area-inset-bottom, 0px))`,
             animation: 'slideUp 0.35s cubic-bezier(0.22,1,0.36,1) both',
             boxShadow: '0 -12px 40px rgba(0,0,0,0.15)',
           }}>
-            <div style={{ width: 40, height: 4, background: '#E5E7EB', borderRadius: 2, margin: '12px auto 20px' }} />
+            <div style={{ width: 40, height: 4, background: '#E5E7EB', borderRadius: 2, margin: '14px auto 20px' }} />
             <button onClick={dismissReferral} style={{
               position: 'absolute', top: 20, right: 20, background: '#F3F4F6',
               border: 'none', borderRadius: '50%', width: 32, height: 32,
@@ -187,23 +182,8 @@ export function HomePage() {
           </div>
         </Link>
 
-        {/* Stat strip — inside header, white text */}
-        <div style={{ display: 'flex', paddingBottom: 18 }}>
-          {[
-            { label: isHindi ? 'नौकरियाँ' : 'Jobs', value: allJobs.length },
-            { label: isHindi ? 'आवेदन' : 'Applied', value: myApps.length },
-            { label: isHindi ? 'अर्जेंट' : 'Urgent', value: allJobs.filter(j => j.urgent).length },
-            { label: isHindi ? 'अधिकतम' : 'Top Pay', value: `₹${Math.round(maxSalary / 1000)}k` },
-          ].map((s, i) => (
-            <div key={i} style={{
-              flex: 1, textAlign: 'center',
-              borderRight: i < 3 ? '1px solid rgba(255,255,255,0.12)' : 'none',
-            }}>
-              <div style={{ fontFamily: 'Baloo 2', fontWeight: 900, fontSize: 20, color: '#fff' }}>{s.value}</div>
-              <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.55)', textTransform: 'uppercase', letterSpacing: 0.4, fontWeight: 600 }}>{s.label}</div>
-            </div>
-          ))}
-        </div>
+        {/* Spacer */}
+        <div style={{ paddingBottom: 18 }} />
       </div>
 
       {/* ── Category Filter Strip ── */}
