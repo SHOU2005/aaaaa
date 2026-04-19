@@ -1,9 +1,9 @@
 /* ═══════════════════════════════════════════════════════════════════════════
    SWITCH — "Ghar ke Pass Job"
-   Premium PWA Design System v2.0
-   Deep Green & Crystal White • Mobile-First • Pixel Perfect
+   Premium PWA Design System v3.0
+   Deep Forest Green • Cream White • Mobile-First • Pixel Perfect
 ═══════════════════════════════════════════════════════════════════════════ */
-@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Serif+Display:ital@0;1&family=Baloo+2:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
 
 /* ─── Design Tokens ───────────────────────────────────────────────────────── */
 :root {
@@ -34,13 +34,16 @@
   --white: #FFFFFF;
 
   /* Semantic */
-  --bg-app:   #F0FDF4;
+  --bg-app:   #F7F8F5;
   --bg-card:  #FFFFFF;
-  --border:   #E5E7EB;
-  --divider:  #F3F4F6;
-  --text-hi:  #111827;
-  --text-mid: #4B5563;
-  --text-lo:  #9CA3AF;
+  --border:   #E8EAE5;
+  --divider:  #F1F2EE;
+  --text-hi:  #0D1B0F;
+  --text-mid: #3D4E3F;
+  --text-lo:  #8A9A8C;
+  --green-dark: #1B6B3A;
+  --green-mid:  #168448;
+  --surface:  #F2F4F0;
 
   /* Status */
   --amber:    #F59E0B;
@@ -83,8 +86,8 @@
 }
 html { height: 100%; scroll-behavior: smooth; }
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background: var(--g800);
+  font-family: 'DM Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #0F5C34;
   color: var(--text-hi);
   min-height: 100dvh;
   display: flex;
@@ -92,7 +95,9 @@ body {
   justify-content: center;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
   overscroll-behavior: none;
+  letter-spacing: -0.01em;
 }
 input, button, select, textarea { font-family: inherit; }
 img { display: block; max-width: 100%; }
@@ -235,6 +240,34 @@ a { color: inherit; }
 }
 .header-location { font-size: 11px; color: var(--text-lo); margin-top: 1px; display: flex; align-items: center; gap: 3px; }
 .header-actions { display: flex; align-items: center; gap: var(--sp-4); margin-left: auto; }
+/* ─── Inner Page Topbar ────────────────────────────────────────────────────── */
+.topbar {
+  background: linear-gradient(160deg, #0F3D21 0%, #1B6B3A 100%);
+  padding: calc(var(--top-pad) + 44px) 16px 16px;
+  position: sticky; top: 0; z-index: 50;
+}
+.topbar-title {
+  font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: 20px; color: #fff;
+}
+.topbar-sub { font-size: 12px; color: rgba(255,255,255,0.55); margin-top: 1px; }
+.topbar-back {
+  width: 36px; height: 36px; border-radius: 12px;
+  background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.18);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: #fff; font-size: 18px; flex-shrink: 0;
+}
+
+/* ─── Section Header ────────────────────────────────────────────────────────── */
+.section-head {
+  display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;
+}
+.section-title {
+  font-weight: 700; font-size: 16px; color: #0D1B0F; letter-spacing: -0.3px; display: flex; align-items: center; gap: 8px;
+}
+.section-link {
+  font-size: 12px; font-weight: 700; color: #1B6B3A; text-decoration: none; letter-spacing: 0.1px;
+}
+
 .header--green {
   background: linear-gradient(160deg, var(--g800) 0%, var(--g700) 100%);
   border-bottom: none;
@@ -320,17 +353,17 @@ a { color: inherit; }
 
 /* ─── Streak Card ──────────────────────────────────────────────────────────── */
 .streak-card {
-  background: linear-gradient(135deg, #FF6B35, #FF8C42);
+  background: linear-gradient(135deg, #0F3D21 0%, #1B6B3A 100%);
   border-radius: var(--r-xl); padding: 14px 16px;
   display: flex; align-items: center; gap: 12px;
-  box-shadow: 0 4px 16px rgba(255,107,53,0.3);
+  box-shadow: 0 4px 16px rgba(27,107,58,0.25);
 }
-.streak-flame  { font-size: 28px; animation: float 2s ease-in-out infinite; }
-.streak-num    { font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: 28px; color: #fff; }
-.streak-label  { font-size: 12px; color: rgba(255,255,255,0.8); font-weight: 500; }
+.streak-flame  { font-size: 22px; }
+.streak-num    { font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: 26px; color: #fff; }
+.streak-label  { font-size: 12px; color: rgba(255,255,255,0.7); font-weight: 500; }
 .streak-days   { display: flex; gap: 4px; margin-top: 4px; }
-.streak-day    { width: 8px; height: 8px; border-radius: 2px; background: rgba(255,255,255,0.3); }
-.streak-day.done { background: #fff; }
+.streak-day    { width: 8px; height: 8px; border-radius: 2px; background: rgba(255,255,255,0.2); }
+.streak-day.done { background: rgba(255,255,255,0.85); }
 
 /* ─── Glass Card ───────────────────────────────────────────────────────────── */
 .glass-card {

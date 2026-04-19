@@ -1,5 +1,4 @@
 import React, { useState, useRef } from 'react';
-// ── LoginPage — Premium redesign ───────────────────────────────────────────────
 import { useNavigate } from 'react-router-dom';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { setOnboarded } from '../data/store';
@@ -14,7 +13,7 @@ export function LoginPage() {
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const sendOtp = async () => {
-    if (mobile.length !== 10) { setError('10 अंकों का सही नंबर डालें'); return; }
+    if (mobile.length !== 10) { setError('Please enter a valid 10-digit number'); return; }
     setError(''); setLoading(true);
     if (isSupabaseConfigured()) {
       const { error: e } = await supabase.auth.signInWithOtp({ phone: `+91${mobile}` });
@@ -28,7 +27,7 @@ export function LoginPage() {
 
   const verifyOtp = async () => {
     const code = otp.join('');
-    if (code.length < 4) { setError('सही OTP डालें'); return; }
+    if (code.length < 4) { setError('Enter a valid OTP'); return; }
     setError(''); setLoading(true);
     if (isSupabaseConfigured()) {
       const { error: e } = await supabase.auth.verifyOtp({ phone: `+91${mobile}`, token: code, type: 'sms' });
@@ -41,143 +40,153 @@ export function LoginPage() {
   };
 
   const handleOtpKey = (i: number, e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Backspace' && !otp[i] && i > 0) {
-      otpRefs.current[i - 1]?.focus();
-    }
+    if (e.key === 'Backspace' && !otp[i] && i > 0) otpRefs.current[i - 1]?.focus();
   };
 
   const handleOtpChange = (i: number, val: string) => {
     const d = val.replace(/\D/g, '').slice(-1);
-    const next = [...otp];
-    next[i] = d;
-    setOtp(next);
-    if (d && i < 5) {
-      otpRefs.current[i + 1]?.focus();
-    }
+    const next = [...otp]; next[i] = d; setOtp(next);
+    if (d && i < 5) otpRefs.current[i + 1]?.focus();
   };
 
-  return (
-    <div className="auth-root">
+  const canSubmit = mobile.length === 10;
 
-      {/* ── Top hero half ── */}
-      <div className="auth-top">
-        <div className="auth-logo" style={{ animation: 'bounceIn 0.6s cubic-bezier(0.22,1,0.36,1) both' }}>
-          📍
+  return (
+    <div style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column', background: '#F7F8F5' }}>
+
+      {/* ── Hero ── */}
+      <div style={{
+        background: 'linear-gradient(165deg, #0F3D21 0%, #1B6B3A 55%, #168448 100%)',
+        flex: '0 0 44%', display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center',
+        padding: '48px 32px 40px', position: 'relative', overflow: 'hidden',
+      }}>
+        {[220, 340, 460].map(size => (
+          <div key={size} style={{
+            position: 'absolute', width: size, height: size,
+            border: '1px solid rgba(255,255,255,0.06)', borderRadius: '50%',
+            top: '50%', left: '50%', transform: 'translate(-50%, -50%)', pointerEvents: 'none',
+          }} />
+        ))}
+        <div style={{
+          width: 72, height: 72, borderRadius: 22,
+          background: 'rgba(255,255,255,0.12)', border: '1.5px solid rgba(255,255,255,0.22)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          marginBottom: 20, backdropFilter: 'blur(8px)',
+          animation: 'scaleIn 0.5s cubic-bezier(0.22,1,0.36,1) both',
+        }}>
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
+            <circle cx="12" cy="10" r="3"/>
+          </svg>
         </div>
-        <div className="auth-brand-name" style={{ animation: 'slideUp 0.5s 0.15s cubic-bezier(0.22,1,0.36,1) both' }}>
-          Switch
+        <div style={{
+          fontFamily: '"DM Serif Display", "Georgia", serif', fontWeight: 400,
+          fontSize: 44, color: '#fff', letterSpacing: -1.5, lineHeight: 1,
+          animation: 'slideUp 0.5s 0.1s cubic-bezier(0.22,1,0.36,1) both',
+        }}>Switch</div>
+        <div style={{ fontSize: 15, color: 'rgba(255,255,255,0.6)', marginTop: 8, fontWeight: 400, animation: 'fadeIn 0.5s 0.3s ease both' }}>
+          घर के पास Job
         </div>
-        <div className="auth-tagline" style={{ animation: 'slideUp 0.5s 0.25s cubic-bezier(0.22,1,0.36,1) both' }}>
-          Ghar ke Pass Job
-        </div>
-        <div className="auth-sub-tag" style={{ animation: 'fadeIn 0.5s 0.45s ease both' }}>
-          India's #1 Local Job Network
+        <div style={{ display: 'flex', gap: 6, marginTop: 20, flexWrap: 'wrap', justifyContent: 'center', animation: 'fadeIn 0.5s 0.5s ease both' }}>
+          {['10k+ Workers', 'Verified Jobs', '100% Free'].map(t => (
+            <span key={t} style={{ fontSize: 10, color: 'rgba(255,255,255,0.5)', background: 'rgba(255,255,255,0.08)', padding: '3px 8px', borderRadius: 20, fontWeight: 500 }}>{t}</span>
+          ))}
         </div>
       </div>
 
-      {/* ── Bottom white card ── */}
-      <div className="auth-bottom anim-slide">
-
+      {/* ── Form card ── */}
+      <div style={{
+        flex: 1, background: '#fff', borderRadius: '28px 28px 0 0', marginTop: -24,
+        padding: '32px 24px 40px', boxShadow: '0 -8px 32px rgba(0,0,0,0.08)',
+        animation: 'slideUp 0.4s 0.15s cubic-bezier(0.22,1,0.36,1) both',
+      }}>
         {step === 'phone' ? (
           <>
-            <div className="auth-heading">लॉग इन करें 👋</div>
-            <div className="auth-sub">आपके नंबर पर OTP भेजा जाएगा</div>
+            <div style={{ marginBottom: 28 }}>
+              <div style={{ fontWeight: 700, fontSize: 24, color: '#0D1B0F', letterSpacing: -0.5, marginBottom: 6 }}>Welcome back</div>
+              <div style={{ fontSize: 14, color: '#8A9A8C' }}>Enter your mobile number to continue</div>
+            </div>
 
-            <div className="field">
-              <label className="field-label">मोबाइल नंबर</label>
+            <div style={{ marginBottom: 20 }}>
+              <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#3D4E3F', marginBottom: 8, letterSpacing: 0.5, textTransform: 'uppercase' as const }}>Mobile Number</label>
               <div style={{ display: 'flex', gap: 8 }}>
-                <div className="field-input" style={{
-                  width: 64, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  background: 'var(--n50)', flexShrink: 0, fontWeight: 700, color: 'var(--g700)',
-                }}>
-                  🇮🇳 +91
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 62, height: 52, background: '#F2F4F0', border: '1.5px solid #E8EAE5', borderRadius: 12, fontSize: 13, fontWeight: 700, color: '#1B6B3A', flexShrink: 0 }}>
+                  +91
                 </div>
                 <input
-                  id="login-mobile"
-                  className="field-input"
-                  type="tel" maxLength={10} placeholder="9876543210"
+                  id="login-mobile" type="tel" maxLength={10} placeholder="98765 43210"
                   value={mobile}
                   onChange={e => { setMobile(e.target.value.replace(/\D/g, '')); setError(''); }}
-                  style={{ flex: 1, fontSize: 18, fontWeight: 600, letterSpacing: 1 }}
                   onKeyDown={e => e.key === 'Enter' && sendOtp()}
+                  style={{ flex: 1, height: 52, border: '1.5px solid #E8EAE5', borderRadius: 12, padding: '0 16px', fontSize: 18, fontWeight: 600, letterSpacing: 2, background: '#F7F8F5', outline: 'none', color: '#0D1B0F' }}
                 />
               </div>
             </div>
 
-            {error && <div style={{ color: 'var(--red)', fontSize: 13, marginBottom: 12, fontWeight: 500 }}>{error}</div>}
+            {error && (
+              <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 10, padding: '10px 14px', fontSize: 13, color: '#B91C1C', marginBottom: 16, fontWeight: 500 }}>
+                {error}
+              </div>
+            )}
 
-            <button
-              id="login-send-otp"
-              className="btn btn-primary btn-full"
-              onClick={sendOtp}
-              disabled={loading || mobile.length !== 10}
-              style={{ fontSize: 15, height: 52, borderRadius: 'var(--r-lg)', marginBottom: 16 }}
-            >
-              {loading ? '⏳ भेज रहे हैं...' : 'OTP भेजें →'}
+            <button id="login-send-otp" onClick={sendOtp} disabled={loading || !canSubmit}
+              style={{
+                width: '100%', height: 52, borderRadius: 14, marginBottom: 20,
+                background: canSubmit ? '#1B6B3A' : '#E8EAE5',
+                color: canSubmit ? '#fff' : '#8A9A8C', border: 'none',
+                fontSize: 15, fontWeight: 700, cursor: canSubmit ? 'pointer' : 'default',
+                boxShadow: canSubmit ? '0 4px 16px rgba(27,107,58,0.3)' : 'none',
+                transition: 'all 0.2s',
+              }}>
+              {loading ? 'Sending…' : 'Send OTP'}
             </button>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-lo)', fontSize: 12, justifyContent: 'center', marginBottom: 20 }}>
-              🔒 10,000+ Workers का भरोसा • 100% Safe
-            </div>
-
-            <div style={{ textAlign: 'center', fontSize: 14, color: 'var(--text-mid)' }}>
-              पहली बार?{' '}
-              <span
-                onClick={() => navigate('/signup')}
-                style={{ color: 'var(--g700)', fontWeight: 700, cursor: 'pointer' }}
-              >
-                खाता बनाएं →
+            <div style={{ textAlign: 'center', fontSize: 14, color: '#8A9A8C' }}>
+              New to Switch?{' '}
+              <span onClick={() => navigate('/signup')} style={{ color: '#1B6B3A', fontWeight: 700, cursor: 'pointer' }}>
+                Create account
               </span>
             </div>
           </>
         ) : (
           <>
-            <div className="auth-heading">OTP Enter करें 🔐</div>
-            <div className="auth-sub">+91 {mobile} पर 6-digit OTP भेजा गया</div>
-
-            {/* 6-Box OTP */}
-            <div className="field">
-              <div className="otp-row">
-                {otp.map((digit, i) => (
-                  <input
-                    key={i}
-                    ref={el => { otpRefs.current[i] = el; }}
-                    className={`otp-box ${digit ? 'filled' : ''}`}
-                    type="text"
-                    inputMode="numeric"
-                    maxLength={1}
-                    value={digit}
-                    onChange={e => handleOtpChange(i, e.target.value)}
-                    onKeyDown={e => handleOtpKey(i, e)}
-                  />
-                ))}
-              </div>
+            <div style={{ marginBottom: 28 }}>
+              <div style={{ fontWeight: 700, fontSize: 24, color: '#0D1B0F', letterSpacing: -0.5, marginBottom: 6 }}>Verify OTP</div>
+              <div style={{ fontSize: 14, color: '#8A9A8C' }}>6-digit code sent to +91 {mobile}</div>
             </div>
 
-            {error && <div style={{ color: 'var(--red)', fontSize: 13, marginBottom: 12, fontWeight: 500, textAlign: 'center' }}>{error}</div>}
+            <div style={{ display: 'flex', gap: 8, marginBottom: 24, justifyContent: 'center' }}>
+              {otp.map((digit, i) => (
+                <input key={i} ref={el => { otpRefs.current[i] = el; }}
+                  type="text" inputMode="numeric" maxLength={1} value={digit}
+                  onChange={e => handleOtpChange(i, e.target.value)}
+                  onKeyDown={e => handleOtpKey(i, e)}
+                  style={{ width: 46, height: 56, textAlign: 'center', fontSize: 22, fontWeight: 700, color: '#0D1B0F', border: `2px solid ${digit ? '#1B6B3A' : '#E8EAE5'}`, borderRadius: 14, background: digit ? '#ECFDF5' : '#F7F8F5', outline: 'none', transition: 'all 0.15s' }}
+                />
+              ))}
+            </div>
 
-            <button
-              id="login-verify-otp"
-              className="btn btn-primary btn-full"
-              onClick={verifyOtp}
-              disabled={loading || otp.join('').length < 4}
-              style={{ fontSize: 15, height: 52, borderRadius: 'var(--r-lg)', marginBottom: 12 }}
-            >
-              {loading ? 'Verifying...' : 'Verify करें ✓'}
+            {error && (
+              <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 10, padding: '10px 14px', fontSize: 13, color: '#B91C1C', marginBottom: 16, fontWeight: 500 }}>
+                {error}
+              </div>
+            )}
+
+            <button id="login-verify-otp" onClick={verifyOtp} disabled={loading || otp.join('').length < 4}
+              style={{ width: '100%', height: 52, borderRadius: 14, background: '#1B6B3A', color: '#fff', border: 'none', fontSize: 15, fontWeight: 700, cursor: 'pointer', boxShadow: '0 4px 16px rgba(27,107,58,0.3)', marginBottom: 16 }}>
+              {loading ? 'Verifying…' : 'Verify & Continue'}
             </button>
 
-            <button
-              onClick={() => { setStep('phone'); setOtp(['', '', '', '', '', '']); setError(''); }}
-              style={{ background: 'none', border: 'none', color: 'var(--text-lo)', fontSize: 13, width: '100%', cursor: 'pointer', textAlign: 'center', padding: 8 }}
-            >
-              ← नंबर बदलें
-            </button>
-
-            <div style={{ textAlign: 'center', marginTop: 12, fontSize: 12, color: 'var(--text-lo)' }}>
-              OTP नहीं आया?{' '}
-              <span style={{ color: 'var(--g700)', fontWeight: 600, cursor: 'pointer' }} onClick={sendOtp}>
-                Resend करें
-              </span>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <button onClick={() => { setStep('phone'); setOtp(['', '', '', '', '', '']); setError(''); }}
+                style={{ background: 'none', border: 'none', color: '#8A9A8C', fontSize: 13, cursor: 'pointer', padding: 0 }}>
+                ← Change number
+              </button>
+              <button onClick={sendOtp}
+                style={{ background: 'none', border: 'none', color: '#1B6B3A', fontSize: 13, fontWeight: 700, cursor: 'pointer', padding: 0 }}>
+                Resend OTP
+              </button>
             </div>
           </>
         )}
