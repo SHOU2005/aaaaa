@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { BottomNav }  from '../components/BottomNav';
-import { useT } from '../i18n/useT';
+import { useT, useLang } from '../i18n/useT';
+import { LangToggle } from '../components/LangToggle';
 import { RingMap }    from '../components/RingMap';
 import { JobCard }    from '../components/JobCard';
 import { getWorker, getJobs, getMyApplications, haversine } from '../data/store';
@@ -37,7 +38,12 @@ export function HomePage() {
 
   const now  = new Date();
   const hour = now.getHours();
-  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  const t = useT();
+  const greeting = hour < 12
+    ? (t('nav.home') === 'Home' ? 'Good morning' : 'शुभ प्रभात')
+    : hour < 17
+    ? (t('nav.home') === 'Home' ? 'Good afternoon' : 'नमस्कार')
+    : (t('nav.home') === 'Home' ? 'Good evening' : 'शुभ संध्या');
 
   const nameInitials = worker.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
 
@@ -150,6 +156,7 @@ export function HomePage() {
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <LangToggle />
             <button
               onClick={() => setReferralVisible(true)}
               style={{

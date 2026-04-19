@@ -1,4 +1,4 @@
-export type Language = 'hi' | 'en' | 'hig'; // Hindi, English, Hinglish
+export type Language = 'hi' | 'en'; // Hindi, English
 
 export interface Captain {
   id: string;

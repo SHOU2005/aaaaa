@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 // ── ProfilePage — Premium Redesign ────────────────────────────────────────────
 import { useNavigate, Link } from 'react-router-dom';
 import { BottomNav } from '../components/BottomNav';
+import { LangToggleDark } from '../components/LangToggle';
 import { getWorker, getMyApplications, saveWorker } from '../data/store';
-import { useT } from '../i18n/useT';
+import { useLang } from '../i18n/useT';
 import type { Worker } from '../types';
 
 const AVATAR_COLORS = ['#168448', '#2563EB', '#7C3AED', '#DC2626', '#EA580C', '#0891B2'];
@@ -50,7 +51,7 @@ function CompletionRing({ pct }: { pct: number }) {
 
 export function ProfilePage() {
   const navigate = useNavigate();
-  const t = useT();
+  const { lang, setLang, t } = useLang();
   const worker = getWorker();
   const apps = getMyApplications();
   const placed = apps.filter(a => a.currentStage === 'Joined').length;
@@ -104,7 +105,7 @@ export function ProfilePage() {
         {/* Top bar */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
           <button onClick={() => navigate(-1)} className="icon-btn icon-btn--white" style={{ visibility: 'hidden' }}>←</button>
-          <div style={{ fontFamily: 'Baloo 2', fontWeight: 700, fontSize: 18, color: '#fff' }}>t('profile.title')</div>
+          <div style={{ fontFamily: 'Baloo 2', fontWeight: 700, fontSize: 18, color: '#fff' }}>{t('profile.title')}</div>
           <button onClick={() => navigate('/profile/edit')} className="icon-btn icon-btn--white">✏️</button>
         </div>
 
@@ -171,7 +172,7 @@ export function ProfilePage() {
             {/* Availability */}
             <div className="card section" style={{ padding: '14px 16px' }}>
               <div style={{ fontFamily: 'Baloo 2', fontWeight: 700, fontSize: 15, marginBottom: 12 }}>
-                t('profile.availability')
+                {t('profile.availability')}
               </div>
               <div className="avail-grid">
                 {AVAIL_OPTS.map(o => (
@@ -186,7 +187,7 @@ export function ProfilePage() {
             {/* Skills / Job Preferences */}
             <div className="card section" style={{ padding: '14px 16px' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-                <div style={{ fontFamily: 'Baloo 2', fontWeight: 700, fontSize: 15 }}>t('profile.skills')</div>
+                <div style={{ fontFamily: 'Baloo 2', fontWeight: 700, fontSize: 15 }}>{t('profile.skills')}</div>
                 <button onClick={() => navigate('/profile/edit')} style={{ border: 'none', background: 'var(--g50)', color: 'var(--g700)', fontSize: 12, fontWeight: 700, padding: '4px 10px', borderRadius: 999, cursor: 'pointer' }}>Edit</button>
               </div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
@@ -205,7 +206,7 @@ export function ProfilePage() {
             {/* Work History */}
             <div className="card section" style={{ padding: '14px 16px' }}>
               <div style={{ fontFamily: 'Baloo 2', fontWeight: 700, fontSize: 15, marginBottom: 14 }}>
-                t('profile.workHistory')
+                {t('profile.workHistory')}
               </div>
               {FAKE_WORK_HISTORY.map((wh, i) => (
                 <div key={i} className="wh-item">
@@ -277,10 +278,22 @@ export function ProfilePage() {
                 </div>
               ))}
 
+              {/* Language — tap to toggle EN/HI instantly */}
+              <div
+                className="detail-row"
+                style={{ padding: '14px 16px', cursor: 'pointer' }}
+                onClick={() => setLang(lang === 'hi' ? 'en' : 'hi')}
+              >
+                <span className="detail-icon">🌐</span>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 600, fontSize: 14 }}>{t('profile.lang')}</div>
+                  <div style={{ fontSize: 12, color: 'var(--text-lo)' }}>{lang === 'hi' ? 'हिन्दी' : 'English'}</div>
+                </div>
+                <LangToggleDark />
+              </div>
               {[
-                { icon: '🌐', label: 'Language', sub: (worker.language ?? 'HI').toUpperCase(), action: '/settings' },
-                { icon: '📞', label: 'Help & Support', sub: 'WhatsApp पर मिलें', action: '/help' },
-                { icon: '🛡️', label: 'Privacy Policy', sub: 'Data protection', action: '/privacy' },
+                { icon: '📞', label: t('profile.help'), sub: t('profile.helpSub'), action: '/help' },
+                { icon: '🛡️', label: t('profile.privacy'), sub: t('profile.privacySub'), action: '/privacy' },
               ].map(item => (
                 <div key={item.label} className="detail-row" style={{ padding: '14px 16px', cursor: 'pointer' }} onClick={() => navigate(item.action)}>
                   <span className="detail-icon">{item.icon}</span>

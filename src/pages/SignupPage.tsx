@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { saveWorker, setOnboarded, generateRegNumber, getWorker } from '../data/store';
-import { useT } from '../i18n/useT';
+import { useLang } from '../i18n/useT';
 import type { Language } from '../types';
 
-const LANGS = [
-  { id: 'hi',  label: 'हिन्दी',   sub: 'ऐप हिन्दी में चलेगा' },
-  { id: 'hig', label: 'Hinglish', sub: 'Hindi + English mix' },
-  { id: 'en',  label: 'English',  sub: 'Full English mode' },
+// Only 2 languages exposed in signup UI
+const LANGS: { id: Language; label: string; sub: string; subEn: string }[] = [
+  { id: 'hi',  label: 'हिन्दी',  sub: 'App हिन्दी में चलेगा', subEn: 'App will run in Hindi' },
+  { id: 'en',  label: 'English', sub: 'Full English mode',      subEn: 'Full English mode' },
 ];
 
 const JOB_TYPES = [
@@ -19,12 +19,13 @@ const JOB_TYPES = [
   { id: 'Technician',     label: 'Technician' },
 ];
 
-const STEPS_META = [
-  { title: 'Language',    sub: 'Choose your preferred language' },
-  { title: 'Your Details', sub: 'Tell us about yourself' },
-  { title: 'Work Type',   sub: 'What kind of work do you do?' },
-  { title: 'Get Verified', sub: 'Stand out to employers' },
-];
+// Static meta — titles are derived inside component from t()
+const STEPS_META_KEYS = [
+  { titleKey: 'signup.langTitle',  subKey: 'signup.langSub' },
+  { titleKey: 'signup.step1.title', subKey: 'signup.step1.sub' },
+  { titleKey: 'signup.step2.title', subKey: 'signup.step2.sub' },
+  { titleKey: 'signup.step3.title', subKey: 'signup.step3.sub' },
+] as const;
 
 function FieldLabel({ children }: { children: React.ReactNode }) {
   return (
@@ -54,21 +55,14 @@ function Input({ placeholder, value, onChange, type = 'text', maxLength }: {
 
 export function SignupPage() {
   const [step,   setStep]  = useState(0);
-  const [lang,   setLang]  = useState<Language>('hi');
   const [name,   setName]  = useState('');
   const [mobile, setMobile]= useState('');
   const [types,  setTypes] = useState<string[]>([]);
   const [photo,  setPhoto] = useState(false);
-  const t = useT();
+  const { lang, setLang, t } = useLang();
   const navigate = useNavigate();
-  // Translated step titles (re-computed when lang changes via t)
-  const stepsLabels = [
-    { title: t('signup.step0.title'), sub: t('signup.step0.sub') },
-    { title: t('signup.step1.title'), sub: t('signup.step1.sub') },
-    { title: t('signup.step2.title'), sub: t('signup.step2.sub') },
-    { title: t('signup.step3.title'), sub: t('signup.step3.sub') },
-  ];
-
+  // Translate step titles reactively
+  const stepsLabels = STEPS_META_KEYS.map(k => ({ title: t(k.titleKey), sub: t(k.subKey) }));
 
   const next = () => setStep(s => s + 1);
   const back = () => setStep(s => s - 1);
@@ -82,7 +76,7 @@ export function SignupPage() {
       name: name || 'Worker',
       mobile: mobile || '9999999999',
       jobTypes: types, skills: types,
-      language: lang,
+      language: lang,    // already updated in context
       isVerified: photo,
       regNumber: generateRegNumber(),
     });
@@ -139,7 +133,7 @@ export function SignupPage() {
 
         {/* Progress bar */}
         <div style={{ display: 'flex', gap: 5, marginTop: 20 }}>
-          {STEPS_META.map((_, i) => (
+          {stepsLabels.map((_, i) => (
             <div key={i} style={{
               flex: 1, height: 3, borderRadius: 99,
               background: i <= step ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.2)',
@@ -162,7 +156,7 @@ export function SignupPage() {
           <div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
               {LANGS.map(l => (
-                <button key={l.id} onClick={() => setLang(l.id as Language)} style={{
+                <button key={l.id} onClick={() => setLang(l.id)} style={{
                   display: 'flex', alignItems: 'center', gap: 14, padding: '14px 16px',
                   borderRadius: 14, cursor: 'pointer', textAlign: 'left',
                   background: lang === l.id ? '#ECFDF5' : '#F7F8F5',
