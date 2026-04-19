@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { MapContainer, TileLayer, Circle, Marker, useMap, ZoomControl } from 'react-leaflet';
 import L from 'leaflet';
 import type { Job } from '../types';
-import { haversine, formatSalary, walkTime } from '../data/store';
+import { haversine, formatSalary, walkTime, getCaptain } from '../data/store';
 
 const CAT_COLORS: Record<string, string> = {
   security:    '#1B6B3A',
@@ -196,49 +196,87 @@ export function RingMap({ jobs, workerLat, workerLng, fullscreen }: Props) {
         </MapContainer>
 
         {/* Job popover */}
-        {sel && (
-          <div className="map-pop anim-slide" onClick={() => navigate(`/jobs/${sel.job.id}`)}>
-            <button className="map-pop-close" onClick={e => { e.stopPropagation(); setSel(null); }}>✕</button>
+        {sel && (() => {
+          const captain = getCaptain(sel.job.captainId);
+          const waMsg = encodeURIComponent(
+            captain
+              ? `नमस्कार ${captain.name} जी! Switch पर "${sel.job.role}" (${sel.job.employerName}) की नौकरी देखी। जानकारी चाहिए।`
+              : `नमस्कार! Switch पर "${sel.job.role}" की नौकरी देखी (${sel.job.employerName})।`
+          );
+          const waHref = captain
+            ? `https://wa.me/91${captain.mobile}?text=${waMsg}`
+            : `https://wa.me/?text=${waMsg}`;
 
-            {/* Top row: icon + title */}
-            <div style={{ display: 'flex', gap: 10, marginBottom: 8 }}>
-              <div style={{
-                width: 40, height: 40, borderRadius: 'var(--r-sm)', flexShrink: 0,
-                background: (CAT_COLORS[sel.job.category] || '#6B7280') + '18',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20,
-              }}>
-                {CAT_ICONS[sel.job.category] || '💼'}
-              </div>
-              <div style={{ flex: 1 }}>
-                <div className="map-pop-role">{sel.job.role}</div>
-                <div className="map-pop-company">{sel.job.employerName}</div>
-              </div>
-            </div>
+          return (
+            <div className="map-pop" style={{ cursor: 'pointer' }}>
+              <button className="map-pop-close" onClick={e => { e.stopPropagation(); setSel(null); }}>✕</button>
 
-            <div className="map-pop-pills">
-              <span className="badge badge-green">📍 {sel.dist.toFixed(1)} km · {walkTime(sel.dist)}</span>
-              {sel.job.urgent && <span className="badge badge-red">⚡ Urgent</span>}
-              <span className="badge badge-blue">👤 {sel.job.openings} खाली</span>
-              {sel.job.food && <span className="badge badge-green">🍽️ खाना</span>}
-            </div>
-
-            <div className="map-pop-foot">
-              <div>
-                <div className="map-pop-salary">
-                  {formatSalary(sel.job.salary.min, sel.job.salary.max)}
-                  <span style={{ fontSize: 12, color: 'var(--text-lo)', fontWeight: 400 }}>/माह</span>
+              {/* Tappable content → job detail */}
+              <div onClick={() => navigate(`/jobs/${sel.job.id}`)}>
+                {/* Top row: icon + title */}
+                <div style={{ display: 'flex', gap: 10, marginBottom: 8 }}>
+                  <div style={{
+                    width: 40, height: 40, borderRadius: 'var(--r-sm)', flexShrink: 0,
+                    background: (CAT_COLORS[sel.job.category] || '#6B7280') + '18',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20,
+                  }}>
+                    {CAT_ICONS[sel.job.category] || '💼'}
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div className="map-pop-role">{sel.job.role}</div>
+                    <div className="map-pop-company">{sel.job.employerName}</div>
+                  </div>
                 </div>
-                <div style={{ fontSize: 11, color: 'var(--text-lo)', marginTop: 2 }}>⭐ {sel.job.employerRating}</div>
+
+                {/* SALARY — hero number */}
+                <div style={{ marginBottom: 8 }}>
+                  <span className="map-pop-salary">
+                    {formatSalary(sel.job.salary.min, sel.job.salary.max)}
+                  </span>
+                  <span style={{ fontSize: 12, color: 'var(--text-lo)', fontWeight: 400 }}>/माह</span>
+                  {(sel.job.food || sel.job.accommodation) && (
+                    <span style={{ marginLeft: 8, fontSize: 11, fontWeight: 700, color: '#065F46', background: '#ECFDF5', borderRadius: 5, padding: '1px 6px' }}>
+                      +{[sel.job.food && 'खाना', sel.job.accommodation && 'रहना'].filter(Boolean).join('+')} FREE
+                    </span>
+                  )}
+                </div>
+
+                <div className="map-pop-pills">
+                  <span className="badge badge-green">📍 {sel.dist.toFixed(1)} km · {walkTime(sel.dist)}</span>
+                  {sel.job.urgent && <span className="badge badge-red">⚡ Urgent</span>}
+                  <span className="badge badge-blue">👤 {sel.job.openings - sel.job.filled} खाली</span>
+                  {sel.job.food && <span className="badge badge-green">🍽️ खाना</span>}
+                </div>
+
+                <div style={{ fontSize: 11, color: 'var(--text-lo)', marginTop: 6 }}>⭐ {sel.job.employerRating} · {sel.job.employerReviewCount} reviews</div>
               </div>
-              <button
-                className="btn btn-primary btn-sm"
-                onClick={e => { e.stopPropagation(); navigate(`/jobs/${sel.job.id}`); }}
-              >
-                Apply करें →
-              </button>
+
+              {/* Action buttons */}
+              <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+                <a
+                  href={waHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={e => e.stopPropagation()}
+                  style={{
+                    flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
+                    background: '#25D366', color: '#fff', borderRadius: 10,
+                    padding: '10px', fontSize: 12, fontWeight: 700, textDecoration: 'none',
+                  }}
+                >
+                  💬 WhatsApp
+                </a>
+                <button
+                  className="btn btn-primary btn-sm"
+                  style={{ flex: 1 }}
+                  onClick={e => { e.stopPropagation(); navigate(`/jobs/${sel.job.id}`); }}
+                >
+                  Apply करें →
+                </button>
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* Distance ring labels */}
         <div style={{

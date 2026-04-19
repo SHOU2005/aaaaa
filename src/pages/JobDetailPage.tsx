@@ -1,7 +1,7 @@
 // ── JobDetailPage — Premium Redesign ──────────────────────────────────────────
 import React, { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { getJob, getCaptain, getWorker, haversine, walkTime, formatSalary, hasApplied } from '../data/store';
+import { getJob, getCaptain, getWorker, haversine, walkTime, formatSalary, hasApplied, isJobSaved, toggleSaveJob } from '../data/store';
 import { useT } from '../i18n/useT';
 import type { TKey } from '../i18n/translations';
 
@@ -34,7 +34,7 @@ export function JobDetailPage() {
   const worker     = getWorker();
   const t = useT();
   const [commuteOpen, setCommuteOpen] = useState(false);
-  const [saved,       setSaved]       = useState(false);
+  const [saved,       setSaved]       = useState(() => isJobSaved(id!));
 
   if (!job) return (
     <div className="empty" style={{ minHeight: '100dvh' }}>
@@ -78,7 +78,7 @@ export function JobDetailPage() {
           <button onClick={() => navigate(-1)} className="icon-btn icon-btn--white">←</button>
           <div style={{ display: 'flex', gap: 8 }}>
             <button
-              onClick={() => setSaved(s => !s)}
+              onClick={() => { const next = toggleSaveJob(id!); setSaved(next); }}
               className="icon-btn icon-btn--white"
               style={{ fontSize: 20 }}
             >
@@ -280,22 +280,50 @@ export function JobDetailPage() {
       </div>
 
       {/* ── STICKY APPLY BAR ── */}
-      <div className="sticky-cta">
+      <div className="sticky-cta" style={{ flexDirection: 'column', gap: 8 }}>
         {applied ? (
-          <Link to="/applications" className="btn btn-secondary btn-full" style={{ textDecoration: 'none' }}>
-            Applied — Track Status
+          <Link to="/applications" className="btn btn-secondary btn-full" style={{ textDecoration: 'none', textAlign: 'center' }}>
+            ✓ Applied — Track Status
           </Link>
         ) : (
           <>
-            <Link to={`/apply/${job.id}`} className="btn btn-primary" style={{ flex: 2, textDecoration: 'none', textAlign: 'center' }}>
-              Apply Now
-            </Link>
-            {captain && (
-              <a href={`https://wa.me/91${captain.mobile}?text=${waText}`} target="_blank" rel="noopener noreferrer"
-                className="btn btn-wa" style={{ flex: 1, textAlign: 'center' }}>
-                WhatsApp
-              </a>
-            )}
+            {/* Salary reminder in apply bar */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 4px' }}>
+              <div>
+                <span style={{ fontFamily: 'Baloo 2', fontWeight: 900, fontSize: 20, color: '#0D1B0F' }}>
+                  {formatSalary(job.salary.min, job.salary.max)}
+                </span>
+                <span style={{ fontSize: 12, color: '#6B7280', marginLeft: 3 }}>/माह</span>
+              </div>
+              <span style={{ fontSize: 11, color: '#1B6B3A', fontWeight: 700, background: '#ECFDF5', padding: '3px 9px', borderRadius: 6 }}>
+                ✓ 2 मिनट में अप्लाई
+              </span>
+            </div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              {captain ? (
+                <>
+                  <a
+                    href={`https://wa.me/91${captain.mobile}?text=${waText}`}
+                    target="_blank" rel="noopener noreferrer"
+                    className="btn btn-wa"
+                    style={{ flex: 2, textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
+                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+                      <path d="M12.016 0C5.396 0 .016 5.38.016 12c0 2.126.558 4.122 1.528 5.854L.005 24l6.335-1.653A11.963 11.963 0 0012.016 24C18.636 24 24 18.62 24 12S18.636 0 12.016 0zm0 21.818c-1.96 0-3.784-.528-5.354-1.44l-.385-.228-3.977 1.038 1.058-3.863-.25-.4A9.797 9.797 0 012.2 12c0-5.412 4.404-9.818 9.816-9.818 5.412 0 9.818 4.406 9.818 9.818 0 5.412-4.406 9.818-9.818 9.818z"/>
+                    </svg>
+                    WhatsApp से अप्लाई
+                  </a>
+                  <Link to={`/apply/${job.id}`} className="btn btn-primary" style={{ flex: 1, textDecoration: 'none', textAlign: 'center' }}>
+                    Form
+                  </Link>
+                </>
+              ) : (
+                <Link to={`/apply/${job.id}`} className="btn btn-primary btn-full" style={{ textDecoration: 'none', textAlign: 'center' }}>
+                  अभी अप्लाई करें →
+                </Link>
+              )}
+            </div>
           </>
         )}
       </div>

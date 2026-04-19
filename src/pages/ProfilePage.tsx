@@ -3,7 +3,8 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { BottomNav } from '../components/BottomNav';
 import { LangToggleDark } from '../components/LangToggle';
-import { getWorker, getMyApplications, saveWorker } from '../data/store';
+import { getWorker, getMyApplications, saveWorker, getSavedJobs, getJob, toggleSaveJob, formatSalary } from '../data/store';
+import { CAT_ACCENT, CAT_LABEL } from '../components/JobCard';
 import { useLang } from '../i18n/useT';
 import type { Worker } from '../types';
 
@@ -61,7 +62,8 @@ export function ProfilePage() {
     jobAlerts: true, appUpdates: true, community: false,
   });
   const [copied, setCopied] = useState(false);
-  const [activeSection, setActiveSection] = useState<'profile' | 'earnings' | 'docs'>('profile');
+  const [activeSection, setActiveSection] = useState<'profile' | 'earnings' | 'docs' | 'saved'>('profile');
+  const [savedIds, setSavedIds] = useState<string[]>(getSavedJobs);
 
   const initials = (worker.name ?? 'W').split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase();
   const avatarBg = AVATAR_COLORS[(worker.name?.charCodeAt(0) ?? 87) % AVATAR_COLORS.length];
@@ -155,14 +157,20 @@ export function ProfilePage() {
 
       {/* ── SECTION TABS ── */}
       <div style={{ padding: '16px 16px 0' }}>
-        <div style={{ display: 'flex', background: 'var(--n100)', borderRadius: 'var(--r-lg)', padding: 4, gap: 4, marginBottom: 16 }}>
-          {([['profile', '👤 Profile'], ['earnings', '💰 Earnings'], ['docs', '📄 Docs']] as const).map(([k, l]) => (
+        <div style={{ display: 'flex', background: 'var(--n100)', borderRadius: 'var(--r-lg)', padding: 4, gap: 2, marginBottom: 16 }}>
+          {([
+            ['profile',  '👤 Profile'],
+            ['earnings', '💰 Earnings'],
+            ['docs',     '📄 Docs'],
+            ['saved',    `❤️ Saved${savedIds.length ? ` (${savedIds.length})` : ''}`],
+          ] as const).map(([k, l]) => (
             <button key={k} onClick={() => setActiveSection(k)} style={{
-              flex: 1, padding: '9px 0', borderRadius: 'calc(var(--r-lg) - 2px)',
+              flex: 1, padding: '9px 2px', borderRadius: 'calc(var(--r-lg) - 2px)',
               background: activeSection === k ? '#fff' : 'transparent',
               border: 'none', color: activeSection === k ? 'var(--g700)' : 'var(--text-lo)',
-              fontWeight: 700, fontSize: 12, cursor: 'pointer', transition: 'all 0.2s',
+              fontWeight: 700, fontSize: 11, cursor: 'pointer', transition: 'all 0.2s',
               boxShadow: activeSection === k ? '0 2px 8px rgba(0,0,0,0.08)' : 'none',
+              whiteSpace: 'nowrap',
             }}>{l}</button>
           ))}
         </div>
@@ -387,6 +395,64 @@ export function ProfilePage() {
                 🏆 आप Top 10% Referrers में हैं!
               </div>
             </div>
+          </div>
+        )}
+
+        {activeSection === 'saved' && (
+          <div className="anim-fade">
+            {savedIds.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '48px 16px' }}>
+                <div style={{ fontSize: 40, marginBottom: 12 }}>🤍</div>
+                <div style={{ fontFamily: 'Baloo 2', fontWeight: 700, fontSize: 17, color: '#0D1B0F', marginBottom: 8 }}>
+                  कोई Saved Job नहीं
+                </div>
+                <div style={{ fontSize: 13, color: '#6B7280', marginBottom: 20, lineHeight: 1.6 }}>
+                  Job detail पर ❤️ दबाएं — वो यहाँ save हो जाएगी
+                </div>
+                <Link to="/jobs" style={{ display: 'inline-block', background: '#1B6B3A', color: '#fff', padding: '11px 20px', borderRadius: 12, textDecoration: 'none', fontWeight: 700, fontSize: 13 }}>
+                  नौकरियाँ देखें →
+                </Link>
+              </div>
+            ) : (
+              savedIds.map(jobId => {
+                const job = getJob(jobId);
+                if (!job) return null;
+                const accent = CAT_ACCENT[job.category] || '#374151';
+                return (
+                  <div key={jobId} style={{ background: '#fff', borderRadius: 14, border: '1px solid #E8EAE6', marginBottom: 10, overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+                    <div style={{ height: 3, background: accent }} />
+                    <div style={{ padding: '13px 14px 12px', display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: 10, fontWeight: 700, color: accent, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>
+                          {CAT_LABEL[job.category] || 'Job'}
+                        </div>
+                        <div style={{ fontFamily: 'Baloo 2', fontWeight: 900, fontSize: 18, color: '#0D1B0F', marginBottom: 2 }}>
+                          {formatSalary(job.salary.min, job.salary.max)}<span style={{ fontSize: 11, color: '#6B7280', fontWeight: 500 }}>/माह</span>
+                        </div>
+                        <div style={{ fontFamily: 'Baloo 2', fontWeight: 700, fontSize: 14, color: '#111827' }}>{job.role}</div>
+                        <div style={{ fontSize: 12, color: '#6B7280', marginTop: 1 }}>{job.employerName}</div>
+                        <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 2 }}>
+                          {job.urgent && <span style={{ color: '#B91C1C', fontWeight: 700 }}>⚡ Urgent · </span>}
+                          📍 {job.location}
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-end' }}>
+                        <button
+                          onClick={() => { toggleSaveJob(jobId); setSavedIds(getSavedJobs()); }}
+                          style={{ background: '#FEF2F2', border: 'none', borderRadius: 8, padding: '6px 8px', cursor: 'pointer', fontSize: 16 }}
+                          title="Remove from saved"
+                        >❤️</button>
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', borderTop: '1px solid #F0F1ED' }}>
+                      <Link to={`/jobs/${jobId}`} style={{ flex: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', background: accent, color: '#fff', padding: '10px', fontSize: 12, fontWeight: 700, textDecoration: 'none' }}>
+                        अप्लाई करें →
+                      </Link>
+                    </div>
+                  </div>
+                );
+              })
+            )}
           </div>
         )}
 

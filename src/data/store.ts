@@ -23,13 +23,26 @@ function set<T>(key: string, value: T) {
   localStorage.setItem(key, JSON.stringify(value));
 }
 
-// Seed on first load
+const STORE_VERSION = 'v3';
+
+// Seed on first load — force re-seed shared data when version changes
 export function initStore() {
-  if (!localStorage.getItem(KEYS.JOBS)) set(KEYS.JOBS, JOBS);
-  if (!localStorage.getItem(KEYS.CAPTAINS)) set(KEYS.CAPTAINS, CAPTAINS);
-  if (!localStorage.getItem(KEYS.COMMUNITIES)) set(KEYS.COMMUNITIES, COMMUNITIES);
-  if (!localStorage.getItem(KEYS.POSTS)) set(KEYS.POSTS, POSTS);
-  if (!localStorage.getItem(KEYS.WORKERS)) set(KEYS.WORKERS, WORKERS);
+  const currentVersion = localStorage.getItem('gpj_version');
+  if (currentVersion !== STORE_VERSION) {
+    // Re-seed shared/static data (not user-specific data)
+    set(KEYS.JOBS, JOBS);
+    set(KEYS.CAPTAINS, CAPTAINS);
+    set(KEYS.COMMUNITIES, COMMUNITIES);
+    set(KEYS.POSTS, POSTS);
+    set(KEYS.WORKERS, WORKERS);
+    localStorage.setItem('gpj_version', STORE_VERSION);
+  } else {
+    if (!localStorage.getItem(KEYS.JOBS)) set(KEYS.JOBS, JOBS);
+    if (!localStorage.getItem(KEYS.CAPTAINS)) set(KEYS.CAPTAINS, CAPTAINS);
+    if (!localStorage.getItem(KEYS.COMMUNITIES)) set(KEYS.COMMUNITIES, COMMUNITIES);
+    if (!localStorage.getItem(KEYS.POSTS)) set(KEYS.POSTS, POSTS);
+    if (!localStorage.getItem(KEYS.WORKERS)) set(KEYS.WORKERS, WORKERS);
+  }
   if (!localStorage.getItem(KEYS.APPLICATIONS)) set(KEYS.APPLICATIONS, APPLICATIONS);
   if (!localStorage.getItem(KEYS.WORKER)) set(KEYS.WORKER, WORKERS[0]);
 }
@@ -44,6 +57,16 @@ export const setOnboarded = () => localStorage.setItem(KEYS.ONBOARDED, '1');
 export const getJobs = (): Job[] => get(KEYS.JOBS, JOBS);
 export const getJob = (id: string): Job | undefined => getJobs().find(j => j.id === id);
 export const saveJobs = (jobs: Job[]) => set(KEYS.JOBS, jobs);
+
+// ── Saved Jobs ────────────────────────────────────────────────────────────────
+export const getSavedJobs = (): string[] => get('gpj_saved_jobs', []);
+export const isJobSaved = (jobId: string): boolean => getSavedJobs().includes(jobId);
+export const toggleSaveJob = (jobId: string): boolean => {
+  const saved = getSavedJobs();
+  const already = saved.includes(jobId);
+  set('gpj_saved_jobs', already ? saved.filter(id => id !== jobId) : [...saved, jobId]);
+  return !already;
+};
 
 // ── Applications ──────────────────────────────────────────────────────────────
 export const getApplications = (): Application[] => get(KEYS.APPLICATIONS, APPLICATIONS);

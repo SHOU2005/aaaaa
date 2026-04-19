@@ -277,7 +277,7 @@ export function ApplyPage() {
                 Note to Captain <span style={{ color: '#9CA3AF', fontWeight: 400 }}>(optional)</span>
               </div>
               <textarea
-                placeholder="{t('apply.notePlaceholder')}…"
+                placeholder={`${t('apply.notePlaceholder')}…`}
                 rows={3}
                 maxLength={120}
                 value={note}

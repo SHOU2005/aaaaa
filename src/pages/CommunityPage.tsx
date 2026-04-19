@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 // ── CommunityPage — Premium Redesign ──────────────────────────────────────────
 import { Link, useNavigate } from 'react-router-dom';
 import { BottomNav } from '../components/BottomNav';
+import { PostCard } from '../components/PostCard';
 import { getCommunities, getPosts, getWorker } from '../data/store';
 
 const TRENDING = ['#GuardJobs', '#DelhiNCR', '#NewOpening', '#Housekeeping', '#Delivery', '#Security'];
@@ -39,8 +40,6 @@ const FAKE_STORIES = [
   { id: 's6', name: 'Lata',    color: '#2563EB', seen: true  },
 ];
 
-const REACTIONS = ['❤️', '😂', '👏', '😮', '🔥'];
-
 type Tab = 'feed' | 'communities' | 'events';
 
 export function CommunityPage() {
@@ -50,17 +49,9 @@ export function CommunityPage() {
   const allPosts        = getPosts().slice(0, 12);
   const [activeTab, setActiveTab] = useState<Tab>('feed');
   const [activeTrend, setActiveTrend] = useState<string | null>(null);
-  const [postLikes, setPostLikes] = useState<Record<string, number>>({});
-  const [postReacted, setPostReacted] = useState<Record<string, string>>({});
+  const [feedKey, setFeedKey] = useState(0);
 
   const initials = (worker.name ?? 'W').charAt(0).toUpperCase();
-
-  const toggleLike = (postId: string, base: number) => {
-    setPostLikes(prev => {
-      const already = prev[postId];
-      return { ...prev, [postId]: already !== undefined ? undefined! : base + 1 };
-    });
-  };
 
   return (
     <div style={{ paddingBottom: 'calc(var(--nav-h) + var(--bot-pad) + 12px)' }}>
@@ -227,68 +218,9 @@ export function CommunityPage() {
                   </Link>
                 </div>
               ) : (
-                allPosts.map((post: any) => {
-                  const likes = postLikes[post.id] ?? (post.likes ?? 0);
-                  const liked = postLikes[post.id] !== undefined;
-                  const reacted = postReacted[post.id];
-                  return (
-                    <div key={post.id} className="post-card">
-                      {/* Author */}
-                      <div className="post-head">
-                        <div className="avatar av-sm" style={{ background: 'var(--g700)' }}>
-                          {(post.authorName || 'W').charAt(0)}
-                        </div>
-                        <div style={{ flex: 1 }}>
-                          <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--text-hi)' }}>{post.authorName ?? 'Worker'}</div>
-                          <div className="post-meta">{post.communityName} · {post.timeAgo ?? 'अभी'}</div>
-                        </div>
-                        <span className="badge badge-green" style={{ fontSize: 10 }}>{post.communityName?.split(' ')[0] ?? 'Community'}</span>
-                      </div>
-
-                      <Link to={`/community/post/${post.id}`} style={{ textDecoration: 'none' }}>
-                        <div className="post-body">{post.body ?? post.content}</div>
-                      </Link>
-
-                      {/* Reaction Row */}
-                      {reacted && (
-                        <div style={{ fontSize: 12, color: 'var(--text-lo)', marginBottom: 6 }}>
-                          आपने {reacted} react किया
-                        </div>
-                      )}
-                      <div className="post-reaction-row">
-                        {REACTIONS.map(r => (
-                          <button key={r} className="post-react-btn"
-                            style={{ opacity: reacted === r ? 1 : 0.6 }}
-                            onClick={() => setPostReacted(prev => ({ ...prev, [post.id]: r }))}>
-                            {r}
-                          </button>
-                        ))}
-                        <span style={{ flex: 1 }} />
-                        <span style={{ fontSize: 11, color: 'var(--text-lo)', alignSelf: 'center' }}>
-                          {likes + (reacted ? 1 : 0)} reactions
-                        </span>
-                      </div>
-
-                      {/* Actions */}
-                      <div className="post-actions">
-                        <button
-                          className={`post-action-btn ${liked ? 'liked' : ''}`}
-                          onClick={() => toggleLike(post.id, post.likes ?? 0)}
-                        >
-                          {liked ? '❤️' : '🤍'} {likes}
-                        </button>
-                        <Link to={`/community/post/${post.id}`} className="post-action-btn" style={{ textDecoration: 'none' }}>
-                          💬 {post.comments?.length ?? 0}
-                        </Link>
-                        <button className="post-action-btn">
-                          🔗 Share
-                        </button>
-                        <span style={{ flex: 1 }} />
-                        {post.isHot && <span className="badge badge-live">🔥 Hot</span>}
-                      </div>
-                    </div>
-                  );
-                })
+                allPosts.map((post: any) => (
+                  <PostCard key={`${post.id}-${feedKey}`} post={post} onUpdate={() => setFeedKey(k => k + 1)} />
+                ))
               )}
             </div>
           </div>
