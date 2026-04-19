@@ -97,7 +97,7 @@ export function ApplyPage() {
       <div className="card card--shadow" style={{ marginBottom: 16 }}>
         <div style={{ padding: '14px 16px' }}>
           <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 12 }}>इस नौकरी के लिए ज़रूरी:</div>
-          {job.documents.map(doc => {
+          {(Array.isArray(job.documents) ? job.documents : typeof job.documents === 'object' && job.documents !== null ? Object.entries(job.documents).filter(([,v]) => v).map(([k]) => k) : typeof job.documents === 'string' ? [job.documents] : []).map((doc: string) => {
             const docName = doc === 'aadhar' ? 'Aadhar Card' : doc === 'police_verification' ? 'Police Verification' : 'Driving Licence';
             const hasDoc = doc === 'aadhar' ? worker.documents.aadhar : doc === 'police_verification' ? worker.documents.policeVerification : true;
             return (

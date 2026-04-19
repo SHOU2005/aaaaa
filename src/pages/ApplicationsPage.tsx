@@ -233,7 +233,7 @@ export function ApplicationsPage() {
                         <div style={{ fontFamily: 'Baloo 2', fontWeight: 800, fontSize: 24, color: 'var(--g700)' }}>
                           ₹{job.salary.min.toLocaleString()}–₹{job.salary.max.toLocaleString()}/mo
                         </div>
-                        <div style={{ fontSize: 12, color: 'var(--text-lo)', marginTop: 2 }}>{job.company} · {job.location}</div>
+                        <div style={{ fontSize: 12, color: 'var(--text-lo)', marginTop: 2 }}>{job.employerName} · {job.location}</div>
                       </div>
                     )}
 

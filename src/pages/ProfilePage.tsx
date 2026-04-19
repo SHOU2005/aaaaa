@@ -75,7 +75,7 @@ export function ProfilePage() {
   };
 
   // Profile completion
-  const fields = [worker.name, worker.phone, worker.sector, worker.city, worker.isVerified];
+  const fields = [worker.name, worker.mobile, worker.sector, worker.city, worker.isVerified];
   const completionPct = Math.round((fields.filter(Boolean).length / fields.length) * 100);
 
   // Fake earnings chart — last 6 months

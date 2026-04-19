@@ -77,7 +77,7 @@ export interface Job {
   };
   uniform: 'company_provided' | 'self' | 'not_required';
   experience: 'Fresher' | '1-2 Years' | '3+ Years';
-  documents: string[];
+  documents: string[] | string | { aadhar?: boolean; policeVerification?: boolean; experience?: boolean; photo?: boolean; };
 }
 
 export type AppStage = 'Applied' | 'Screening' | 'Interviewed' | 'Offer' | 'Joined' | 'Rejected';
@@ -139,6 +139,8 @@ export interface Community {
   name: string;
   description: string;
   avatar: string;
+  icon?: string;
+  memberCount?: number;
   memberIds: string[];
   tags: string[];
   employer?: string; // If tied to a company
