@@ -5,20 +5,20 @@ import { BottomNav } from '../components/BottomNav';
 import { getWorker, getMyApplications, saveWorker } from '../data/store';
 import type { Worker } from '../types';
 
-const AVATAR_COLORS = ['#168448','#2563EB','#7C3AED','#DC2626','#EA580C','#0891B2'];
+const AVATAR_COLORS = ['#168448', '#2563EB', '#7C3AED', '#DC2626', '#EA580C', '#0891B2'];
 
 const AVAIL_OPTS = [
-  { id: 'available',   icon: '🟢', label: 'उपलब्ध हूँ' },
-  { id: 'working',     icon: '🔵', label: 'काम पर हूँ' },
+  { id: 'available', icon: '🟢', label: 'उपलब्ध हूँ' },
+  { id: 'working', icon: '🔵', label: 'काम पर हूँ' },
   { id: 'unavailable', icon: '🔴', label: 'उपलब्ध नहीं' },
 ];
 
-const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 const FAKE_WORK_HISTORY = [
   { role: 'Security Guard', company: 'SpaceX Towers, Gurgaon', period: 'Jan 2024 – Mar 2024', icon: '🏢', rating: 4, bg: '#EFF6FF', color: '#1D4ED8' },
-  { role: 'Delivery Boy',   company: 'Swiggy Instamart',        period: 'Oct 2023 – Dec 2023', icon: '🛵', rating: 5, bg: '#F0FDF4', color: '#168448' },
-  { role: 'Housekeeping',   company: 'Taj Hotels, Delhi',        period: 'Jun 2023 – Sep 2023', icon: '🏨', rating: 3, bg: '#FFF7ED', color: '#C2410C' },
+  { role: 'Delivery Boy', company: 'Swiggy Instamart', period: 'Oct 2023 – Dec 2023', icon: '🛵', rating: 5, bg: '#F0FDF4', color: '#168448' },
+  { role: 'Housekeeping', company: 'Taj Hotels, Delhi', period: 'Jun 2023 – Sep 2023', icon: '🏨', rating: 3, bg: '#FFF7ED', color: '#C2410C' },
 ];
 
 const NOTIFICATIONS_TOGGLE = [
@@ -48,10 +48,10 @@ function CompletionRing({ pct }: { pct: number }) {
 }
 
 export function ProfilePage() {
-  const navigate  = useNavigate();
-  const worker    = getWorker();
-  const apps      = getMyApplications();
-  const placed    = apps.filter(a => a.currentStage === 'Joined').length;
+  const navigate = useNavigate();
+  const worker = getWorker();
+  const apps = getMyApplications();
+  const placed = apps.filter(a => a.currentStage === 'Joined').length;
 
   const [avail, setAvail] = useState<Worker['availability']>(worker.availability ?? 'available');
   const [notifs, setNotifs] = useState<Record<string, boolean>>({
@@ -60,8 +60,8 @@ export function ProfilePage() {
   const [copied, setCopied] = useState(false);
   const [activeSection, setActiveSection] = useState<'profile' | 'earnings' | 'docs'>('profile');
 
-  const initials  = (worker.name ?? 'W').split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase();
-  const avatarBg  = AVATAR_COLORS[(worker.name?.charCodeAt(0) ?? 87) % AVATAR_COLORS.length];
+  const initials = (worker.name ?? 'W').split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase();
+  const avatarBg = AVATAR_COLORS[(worker.name?.charCodeAt(0) ?? 87) % AVATAR_COLORS.length];
 
   const updateAvail = (val: string) => {
     setAvail(val as Worker['availability']);
@@ -69,7 +69,7 @@ export function ProfilePage() {
   };
 
   const copyCode = () => {
-    navigator.clipboard?.writeText(worker.referralCode ?? 'SW-XXXX').catch(() => {});
+    navigator.clipboard?.writeText(worker.referralCode ?? 'SW-XXXX').catch(() => { });
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -88,10 +88,10 @@ export function ProfilePage() {
   const maxEarning = Math.max(...earningsData.map(e => e.amount), 1);
 
   const DOC_ITEMS = [
-    { label: 'Aadhar Card',    done: !!worker.isVerified, icon: '🪪' },
-    { label: 'Selfie Photo',   done: !!worker.isVerified, icon: '🤳' },
-    { label: 'Police Verify',  done: false,               icon: '👮' },
-    { label: 'Bank Details',   done: false,               icon: '🏦' },
+    { label: 'Aadhar Card', done: !!worker.isVerified, icon: '🪪' },
+    { label: 'Selfie Photo', done: !!worker.isVerified, icon: '🤳' },
+    { label: 'Police Verify', done: false, icon: '👮' },
+    { label: 'Bank Details', done: false, icon: '🏦' },
   ];
 
   return (
@@ -138,8 +138,8 @@ export function ProfilePage() {
         {/* Stats row */}
         <div className="profile-stat-row">
           {[
-            { v: apps.length,                    l: 'Applied',  icon: '📋' },
-            { v: placed,                          l: 'Placed',   icon: '✅' },
+            { v: apps.length, l: 'Applied', icon: '📋' },
+            { v: placed, l: 'Placed', icon: '✅' },
             { v: worker.workHistory?.length ?? FAKE_WORK_HISTORY.length, l: 'Experience', icon: '🏆' },
           ].map((s, i) => (
             <div key={i} className="profile-stat">
@@ -215,7 +215,7 @@ export function ProfilePage() {
                     <div className="wh-company">{wh.company}</div>
                     <div className="wh-period">📅 {wh.period}</div>
                     <div className="wh-rating">
-                      {[1,2,3,4,5].map(s => (
+                      {[1, 2, 3, 4, 5].map(s => (
                         <span key={s} className={`wh-star ${s <= wh.rating ? 'on' : ''}`}>★</span>
                       ))}
                       <span style={{ fontSize: 11, color: 'var(--text-lo)', marginLeft: 4 }}>{wh.rating}/5</span>
@@ -345,7 +345,7 @@ export function ProfilePage() {
                 <div style={{ textAlign: 'right' }}>
                   <div style={{ fontSize: 11, color: 'var(--text-lo)' }}>Average</div>
                   <div style={{ fontFamily: 'Baloo 2', fontWeight: 700, fontSize: 15, color: 'var(--text-mid)' }}>
-                    ₹{Math.round(earningsData.reduce((s,e) => s + e.amount, 0) / earningsData.length).toLocaleString()}
+                    ₹{Math.round(earningsData.reduce((s, e) => s + e.amount, 0) / earningsData.length).toLocaleString()}
                   </div>
                 </div>
               </div>
@@ -393,7 +393,7 @@ export function ProfilePage() {
                   </div>
                   {d.done
                     ? <span className="doc-status-uploaded">✓ Uploaded</span>
-                    : <button className="btn btn-secondary btn-sm" onClick={() => {}}>Upload ↗</button>}
+                    : <button className="btn btn-secondary btn-sm" onClick={() => { }}>Upload ↗</button>}
                 </div>
               ))}
 
@@ -408,9 +408,9 @@ export function ProfilePage() {
             <div className="card section" style={{ padding: 16 }}>
               <div style={{ fontFamily: 'Baloo 2', fontWeight: 700, fontSize: 15, marginBottom: 12 }}>⭐ Trust Score</div>
               {[
-                { label: 'Profile Complete',  pct: completionPct, color: 'var(--g700)' },
+                { label: 'Profile Complete', pct: completionPct, color: 'var(--g700)' },
                 { label: 'Documents Uploaded', pct: DOC_ITEMS.filter(d => d.done).length / DOC_ITEMS.length * 100, color: 'var(--blue)' },
-                { label: 'Community Active',   pct: 40, color: 'var(--purple)' },
+                { label: 'Community Active', pct: 40, color: 'var(--purple)' },
               ].map(row => (
                 <div key={row.label} style={{ marginBottom: 12 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>

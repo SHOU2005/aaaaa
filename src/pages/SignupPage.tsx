@@ -1,37 +1,67 @@
-import React from 'react';
-// ── SignupPage ────────────────────────────────────────────────────────────────
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { saveWorker, setOnboarded, generateRegNumber, getWorker } from '../data/store';
 import type { Language } from '../types';
 
 const LANGS = [
-  { id: 'hi',  emoji: '🇮🇳', label: 'हिन्दी',   desc: 'ऐप हिन्दी में' },
-  { id: 'hig', emoji: '🤝', label: 'Hinglish', desc: 'Mix of dono' },
-  { id: 'en',  emoji: '🌍', label: 'English',  desc: 'Full English' },
+  { id: 'hi',  label: 'हिन्दी',   sub: 'ऐप हिन्दी में चलेगा' },
+  { id: 'hig', label: 'Hinglish', sub: 'Hindi + English mix' },
+  { id: 'en',  label: 'English',  sub: 'Full English mode' },
 ];
 
 const JOB_TYPES = [
-  { id: 'Security Guard', icon: '🔒', label: 'Security' },
-  { id: 'Housekeeping',   icon: '🧹', label: 'Housekeeping' },
-  { id: 'Driver',         icon: '🚗', label: 'Driver' },
-  { id: 'Cook',           icon: '👨‍🍳', label: 'Cook / Chef' },
-  { id: 'Helper',         icon: '🏗️',  label: 'Helper' },
-  { id: 'Technician',     icon: '🔧', label: 'Technician' },
+  { id: 'Security Guard', label: 'Security Guard' },
+  { id: 'Housekeeping',   label: 'Housekeeping' },
+  { id: 'Driver',         label: 'Driver' },
+  { id: 'Cook',           label: 'Cook / Chef' },
+  { id: 'Helper',         label: 'Helper' },
+  { id: 'Technician',     label: 'Technician' },
 ];
 
+const STEPS_META = [
+  { title: 'Language',    sub: 'Choose your preferred language' },
+  { title: 'Your Details', sub: 'Tell us about yourself' },
+  { title: 'Work Type',   sub: 'What kind of work do you do?' },
+  { title: 'Get Verified', sub: 'Stand out to employers' },
+];
+
+function FieldLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <div style={{ fontSize: 11, fontWeight: 700, color: '#3D4E3F', marginBottom: 8, letterSpacing: 0.5, textTransform: 'uppercase' as const }}>
+      {children}
+    </div>
+  );
+}
+
+function Input({ placeholder, value, onChange, type = 'text', maxLength }: {
+  placeholder: string; value: string; onChange: (v: string) => void; type?: string; maxLength?: number;
+}) {
+  return (
+    <input
+      type={type} maxLength={maxLength} placeholder={placeholder} value={value}
+      onChange={e => onChange(e.target.value)}
+      style={{
+        width: '100%', height: 52, border: '1.5px solid #E8EAE5', borderRadius: 12,
+        padding: '0 16px', fontSize: 15, fontWeight: 500, background: '#F7F8F5',
+        outline: 'none', color: '#0D1B0F', letterSpacing: type === 'tel' ? 1.5 : 0,
+      }}
+      onFocus={e => e.target.style.borderColor = '#1B6B3A'}
+      onBlur={e => e.target.style.borderColor = '#E8EAE5'}
+    />
+  );
+}
+
 export function SignupPage() {
-  const [step,  setStep]  = useState(0);
-  const [lang,  setLang]  = useState<Language>('hi');
-  const [name,  setName]  = useState('');
-  const [mobile,setMobile]= useState('');
-  const [types, setTypes] = useState<string[]>([]);
-  const [photo, setPhoto] = useState(false);
+  const [step,   setStep]  = useState(0);
+  const [lang,   setLang]  = useState<Language>('hi');
+  const [name,   setName]  = useState('');
+  const [mobile, setMobile]= useState('');
+  const [types,  setTypes] = useState<string[]>([]);
+  const [photo,  setPhoto] = useState(false);
   const navigate = useNavigate();
 
   const next = () => setStep(s => s + 1);
   const back = () => setStep(s => s - 1);
-
   const toggleType = (id: string) =>
     setTypes(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
 
@@ -50,161 +80,231 @@ export function SignupPage() {
     navigate('/home');
   };
 
-  const STEPS = [
-    /* 0 — Language */
-    <div key="lang">
-      <div style={{ textAlign: 'center', marginBottom: 24 }}>
-        <div style={{ fontSize: 44, marginBottom: 8 }}>🗣️</div>
-        <div className="auth-heading">भाषा चुनें</div>
-        <div className="auth-sub">Choose your language</div>
-      </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
-        {LANGS.map(l => (
-          <button key={l.id} onClick={() => setLang(l.id as Language)} style={{
-            display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px',
-            borderRadius: 'var(--r-lg)', background: lang === l.id ? 'var(--g50)' : 'var(--n50)',
-            border: `2px solid ${lang === l.id ? 'var(--g700)' : 'var(--border)'}`,
-            cursor: 'pointer', textAlign: 'left',
-          }}>
-            <span style={{ fontSize: 24 }}>{l.emoji}</span>
-            <div>
-              <div style={{ fontWeight: 700, fontSize: 15, color: lang === l.id ? 'var(--g700)' : 'var(--text-hi)' }}>{l.label}</div>
-              <div style={{ fontSize: 12, color: 'var(--text-lo)' }}>{l.desc}</div>
-            </div>
-            {lang === l.id && <span style={{ marginLeft: 'auto', color: 'var(--g700)', fontSize: 18 }}>✓</span>}
-          </button>
-        ))}
-      </div>
-      <button className="btn btn-primary btn-full" onClick={next}>अगला →</button>
-    </div>,
-
-    /* 1 — Basic Info */
-    <div key="info">
-      <div style={{ textAlign: 'center', marginBottom: 24 }}>
-        <div style={{ fontSize: 44, marginBottom: 8 }}>👤</div>
-        <div className="auth-heading">आपकी जानकारी</div>
-        <div className="auth-sub">Profile बनाएं</div>
-      </div>
-      <div className="field">
-        <label className="field-label">आपका पूरा नाम *</label>
-        <input className="field-input" placeholder="Rahul Kumar" value={name} onChange={e => setName(e.target.value)} />
-      </div>
-      <div className="field">
-        <label className="field-label">मोबाइल नंबर *</label>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <div className="field-input" style={{ width: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--n100)', flexShrink: 0 }}>+91</div>
-          <input className="field-input" style={{ flex: 1 }} type="tel" maxLength={10} placeholder="9876543210" value={mobile} onChange={e => setMobile(e.target.value)} />
-        </div>
-      </div>
-      <button className="btn btn-primary btn-full" onClick={next} disabled={!name || mobile.length !== 10} style={{ marginTop: 8 }}>
-        अगला →
-      </button>
-    </div>,
-
-    /* 2 — Job Types */
-    <div key="jobs">
-      <div style={{ textAlign: 'center', marginBottom: 24 }}>
-        <div style={{ fontSize: 44, marginBottom: 8 }}>💼</div>
-        <div className="auth-heading">क्या काम करते हैं?</div>
-        <div className="auth-sub">एक या अधिक चुनें</div>
-      </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 24 }}>
-        {JOB_TYPES.map(jt => {
-          const sel = types.includes(jt.id);
-          return (
-            <button key={jt.id} onClick={() => toggleType(jt.id)} style={{
-              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
-              padding: '16px 12px', borderRadius: 'var(--r-lg)',
-              background: sel ? 'var(--g50)' : 'var(--n50)',
-              border: `2px solid ${sel ? 'var(--g700)' : 'var(--border)'}`,
-              cursor: 'pointer',
-            }}>
-              <span style={{ fontSize: 30 }}>{jt.icon}</span>
-              <span style={{ fontWeight: 600, fontSize: 13, color: sel ? 'var(--g700)' : 'var(--text-hi)' }}>{jt.label}</span>
-            </button>
-          );
-        })}
-      </div>
-      <button className="btn btn-primary btn-full" onClick={next} disabled={types.length === 0}>
-        अगला →
-      </button>
-    </div>,
-
-    /* 3 — Switch Verified */
-    <div key="verify">
-      <div style={{ textAlign: 'center', marginBottom: 20 }}>
-        <div style={{ fontSize: 44, marginBottom: 8 }}>⭐</div>
-        <div className="auth-heading">Switch Verified बनें</div>
-        <div className="auth-sub">Verified workers को 3× ज़्यादा calls आती हैं</div>
-      </div>
-
-      <div style={{ background: 'var(--amber-bg)', border: '1.5px solid #FDE68A', borderRadius: 'var(--r-lg)', padding: 14, marginBottom: 20 }}>
-        <div style={{ fontWeight: 700, fontSize: 14, color: '#92400E', marginBottom: 6 }}>क्या मिलेगा?</div>
-        {['⭐ Profile पर Verified badge', '📞 Employers directly call करते हैं', '💰 ज़्यादा salary offers'].map(b => (
-          <div key={b} style={{ fontSize: 13, color: '#78350F', marginBottom: 4 }}>{b}</div>
-        ))}
-      </div>
-
-      {/* Selfie upload */}
-      <div
-        onClick={() => setPhoto(true)}
-        style={{
-          height: 130, borderRadius: 'var(--r-xl)', cursor: 'pointer', marginBottom: 12,
-          border: `2px dashed ${photo ? 'var(--g700)' : 'var(--n300)'}`,
-          background: photo ? 'var(--g50)' : 'var(--n50)',
-          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6,
-        }}
-      >
-        <span style={{ fontSize: 32 }}>{photo ? '📸' : '📷'}</span>
-        <span style={{ fontSize: 13, color: photo ? 'var(--g700)' : 'var(--text-lo)', fontWeight: 600 }}>
-          {photo ? 'Selfie Uploaded ✓' : 'Tap to Upload Selfie'}
-        </span>
-      </div>
-
-      <div style={{ fontSize: 12, color: 'var(--text-lo)', textAlign: 'center', marginBottom: 20 }}>
-        Aadhar verification भी ज़रूरी है (बाद में भी हो सकता है)
-      </div>
-
-      <button className="btn btn-primary btn-full" onClick={finish} style={{ marginBottom: 10 }}>
-        {photo ? 'Account बनाएं ✓' : 'Skip & बाद में करें'}
-      </button>
-    </div>,
-  ];
+  const primary  = '#1B6B3A';
+  const canNext0 = true;
+  const canNext1 = name.trim().length >= 2 && mobile.length === 10;
+  const canNext2 = types.length > 0;
+  const canNext  = [canNext0, canNext1, canNext2, true][step];
 
   return (
-    <div className="auth-root">
-      {/* Logo top */}
-      <div style={{ width: '100%', maxWidth: 390, textAlign: 'center', marginBottom: 20 }}>
-        <div className="auth-logo">📍</div>
-      </div>
+    <div style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column', background: '#F7F8F5' }}>
 
-      {/* Progress */}
-      <div className="progress-dots" style={{ width: '100%', maxWidth: 390, padding: '0 4px' }}>
-        {[0, 1, 2, 3].map(i => (
-          <div key={i} className={`progress-dot ${i <= step ? 'done' : ''}`} />
+      {/* ── Top green header ── */}
+      <div style={{
+        background: `linear-gradient(165deg, #0F3D21 0%, ${primary} 55%, #168448 100%)`,
+        padding: 'calc(env(safe-area-inset-top,0px) + 48px) 20px 28px',
+        position: 'relative', overflow: 'hidden',
+      }}>
+        {/* Background rings */}
+        {[200, 320, 440].map(size => (
+          <div key={size} style={{
+            position: 'absolute', width: size, height: size,
+            border: '1px solid rgba(255,255,255,0.06)', borderRadius: '50%',
+            top: '50%', left: '50%', transform: 'translate(-50%, -50%)', pointerEvents: 'none',
+          }} />
         ))}
-      </div>
 
-      <div className="auth-card anim-slide">
-        {STEPS[step]}
-      </div>
-
-      {step > 0 && (
-        <button
-          onClick={back}
-          style={{ background: 'none', border: 'none', color: 'var(--text-lo)', fontSize: 14, marginTop: 14, cursor: 'pointer' }}
-        >
-          ← वापस जाएं
-        </button>
-      )}
-      {step === 0 && (
-        <div style={{ marginTop: 14, fontSize: 14, color: 'var(--text-mid)' }}>
-          पहले से खाता है?{' '}
-          <span onClick={() => location.href='/login'} style={{ color: 'var(--g700)', fontWeight: 700, cursor: 'pointer' }}>
-            लॉग इन करें →
-          </span>
+        {/* Back / brand row */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24, position: 'relative' }}>
+          <button
+            onClick={() => step === 0 ? navigate('/login') : back()}
+            style={{ width: 36, height: 36, borderRadius: 11, background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0, color: '#fff' }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <div style={{ fontFamily: '"DM Serif Display","Georgia",serif', fontSize: 28, color: '#fff', letterSpacing: -1 }}>Switch</div>
+          <div style={{ marginLeft: 'auto', fontSize: 12, color: 'rgba(255,255,255,0.5)', fontWeight: 500 }}>
+            Step {step + 1} of {STEPS_META.length}
+          </div>
         </div>
-      )}
+
+        {/* Step heading */}
+        <div style={{ position: 'relative' }}>
+          <div style={{ fontWeight: 800, fontSize: 26, color: '#fff', letterSpacing: -0.5, lineHeight: 1.1, marginBottom: 4 }}>
+            {STEPS_META[step].title}
+          </div>
+          <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.55)' }}>
+            {STEPS_META[step].sub}
+          </div>
+        </div>
+
+        {/* Progress bar */}
+        <div style={{ display: 'flex', gap: 5, marginTop: 20 }}>
+          {STEPS_META.map((_, i) => (
+            <div key={i} style={{
+              flex: 1, height: 3, borderRadius: 99,
+              background: i <= step ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.2)',
+              transition: 'background 0.3s',
+            }} />
+          ))}
+        </div>
+      </div>
+
+      {/* ── Form card ── */}
+      <div style={{
+        flex: 1, background: '#fff', borderRadius: '28px 28px 0 0',
+        marginTop: -20, padding: '28px 20px 40px',
+        boxShadow: '0 -8px 32px rgba(0,0,0,0.08)',
+        animation: 'slideUp 0.3s cubic-bezier(0.22,1,0.36,1) both',
+      }}>
+
+        {/* ─ Step 0: Language ─ */}
+        {step === 0 && (
+          <div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
+              {LANGS.map(l => (
+                <button key={l.id} onClick={() => setLang(l.id as Language)} style={{
+                  display: 'flex', alignItems: 'center', gap: 14, padding: '14px 16px',
+                  borderRadius: 14, cursor: 'pointer', textAlign: 'left',
+                  background: lang === l.id ? '#ECFDF5' : '#F7F8F5',
+                  border: `1.5px solid ${lang === l.id ? primary : '#E8EAE5'}`,
+                  transition: 'all 0.15s',
+                }}>
+                  <div style={{ width: 40, height: 40, borderRadius: 12, background: lang === l.id ? primary : '#E8EAE5', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={lang === l.id ? '#fff' : '#6B7280'} strokeWidth="2" strokeLinecap="round">
+                      <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+                    </svg>
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 700, fontSize: 15, color: lang === l.id ? primary : '#0D1B0F' }}>{l.label}</div>
+                    <div style={{ fontSize: 12, color: '#9CA3AF', marginTop: 1 }}>{l.sub}</div>
+                  </div>
+                  {lang === l.id && (
+                    <div style={{ width: 20, height: 20, borderRadius: '50%', background: primary, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    </div>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ─ Step 1: Basic info ─ */}
+        {step === 1 && (
+          <div>
+            <div style={{ marginBottom: 18 }}>
+              <FieldLabel>Full Name</FieldLabel>
+              <Input placeholder="e.g. Rahul Kumar" value={name} onChange={setName} />
+            </div>
+            <div style={{ marginBottom: 8 }}>
+              <FieldLabel>Mobile Number</FieldLabel>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 62, height: 52, background: '#F2F4F0', border: '1.5px solid #E8EAE5', borderRadius: 12, fontSize: 13, fontWeight: 700, color: primary, flexShrink: 0 }}>
+                  +91
+                </div>
+                <Input placeholder="98765 43210" value={mobile} onChange={v => setMobile(v.replace(/\D/g, ''))} type="tel" maxLength={10} />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ─ Step 2: Job types ─ */}
+        {step === 2 && (
+          <div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 8 }}>
+              {JOB_TYPES.map(jt => {
+                const sel = types.includes(jt.id);
+                return (
+                  <button key={jt.id} onClick={() => toggleType(jt.id)} style={{
+                    padding: '16px 12px', borderRadius: 14, cursor: 'pointer', textAlign: 'left',
+                    background: sel ? '#ECFDF5' : '#F7F8F5',
+                    border: `1.5px solid ${sel ? primary : '#E8EAE5'}`,
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    transition: 'all 0.15s',
+                  }}>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: sel ? primary : '#0D1B0F' }}>{jt.label}</span>
+                    <div style={{
+                      width: 20, height: 20, borderRadius: '50%', flexShrink: 0,
+                      background: sel ? primary : '#E8EAE5',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      transition: 'all 0.15s',
+                    }}>
+                      {sel && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+            {types.length > 0 && (
+              <div style={{ fontSize: 12, color: '#8A9A8C', marginTop: 8 }}>
+                {types.length} selected · You can always change this later
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ─ Step 3: Verification ─ */}
+        {step === 3 && (
+          <div>
+            {/* Benefits */}
+            <div style={{ background: '#ECFDF5', borderRadius: 14, padding: '16px', marginBottom: 20, border: '1px solid #A7F3D0' }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: '#1B6B3A', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 12 }}>Benefits of Verification</div>
+              {[
+                { text: 'Verified badge on your profile', icon: '✓' },
+                { text: 'Employers call you directly', icon: '✓' },
+                { text: '3× more salary offers on average', icon: '✓' },
+              ].map(b => (
+                <div key={b.text} style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 8 }}>
+                  <div style={{ width: 20, height: 20, borderRadius: '50%', background: '#1B6B3A', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  </div>
+                  <span style={{ fontSize: 13, color: '#1B6B3A', fontWeight: 600 }}>{b.text}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Selfie upload */}
+            <div onClick={() => setPhoto(true)} style={{
+              height: 130, borderRadius: 16, cursor: 'pointer', marginBottom: 12,
+              border: `2px dashed ${photo ? primary : '#D1D5DB'}`,
+              background: photo ? '#ECFDF5' : '#F7F8F5',
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10,
+              transition: 'all 0.2s',
+            }}>
+              <div style={{ width: 48, height: 48, borderRadius: 14, background: photo ? primary : '#E8EAE5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={photo ? 'white' : '#6B7280'} strokeWidth="1.8" strokeLinecap="round">
+                  <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
+                  <circle cx="12" cy="13" r="4"/>
+                </svg>
+              </div>
+              <span style={{ fontSize: 13, color: photo ? primary : '#9CA3AF', fontWeight: 700 }}>
+                {photo ? 'Selfie Uploaded' : 'Tap to Upload Selfie'}
+              </span>
+            </div>
+
+            <div style={{ fontSize: 12, color: '#9CA3AF', textAlign: 'center', marginBottom: 16 }}>
+              Aadhar verification can also be done later from your profile
+            </div>
+          </div>
+        )}
+
+        {/* ─ Primary action button ─ */}
+        <button
+          onClick={step === STEPS_META.length - 1 ? finish : next}
+          disabled={!canNext}
+          style={{
+            width: '100%', height: 52, borderRadius: 14, marginTop: 8,
+            background: canNext ? primary : '#E8EAE5',
+            color: canNext ? '#fff' : '#9CA3AF',
+            border: 'none', fontSize: 15, fontWeight: 700, cursor: canNext ? 'pointer' : 'default',
+            boxShadow: canNext ? `0 4px 16px rgba(27,107,58,0.3)` : 'none',
+            transition: 'all 0.2s',
+          }}>
+          {step === STEPS_META.length - 1
+            ? (photo ? 'Create Account' : 'Skip & Continue')
+            : 'Continue'}
+        </button>
+
+        {/* Bottom link */}
+        {step === 0 && (
+          <div style={{ textAlign: 'center', marginTop: 20, fontSize: 14, color: '#8A9A8C' }}>
+            Already have an account?{' '}
+            <span onClick={() => navigate('/login')} style={{ color: primary, fontWeight: 700, cursor: 'pointer' }}>
+              Sign in
+            </span>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
