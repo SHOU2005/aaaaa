@@ -1,0 +1,3 @@
+/* Leaflet container background for light tiles */
+.leaflet-container { background: #eef5f1 !important; }
+.leaflet-control-attribution { display: none !important; }
