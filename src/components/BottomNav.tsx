@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useT } from '../i18n/useT';
 
 // Premium SVG icons — no emoji
 const HomeIcon = ({ filled }: { filled: boolean }) => (
@@ -75,7 +76,15 @@ const ITEMS: NavItem[] = [
 
 export function BottomNav() {
   const { pathname } = useLocation();
+  const t = useT();
   const isActive = (to: string) => pathname === to || pathname.startsWith(to + '/');
+  // Translated labels keyed to each route
+  const labels: Record<string, string> = {
+    '/home':         t('nav.home'),
+    '/jobs':         t('nav.jobs'),
+    '/applications': t('nav.status'),
+    '/profile':      t('nav.profile'),
+  };
 
   return (
     <nav style={{
@@ -129,10 +138,9 @@ export function BottomNav() {
             }}>
               <item.Icon filled={isActive(item.to)} />
             </div>
-            <span style={{
-              fontSize: 10, fontWeight: isActive(item.to) ? 700 : 500,
-              letterSpacing: 0.1, lineHeight: 1,
-            }}>{item.label}</span>
+            <span style={{ fontSize: 10, fontWeight: isActive(item.to) ? 700 : 500, letterSpacing: 0.1, lineHeight: 1 }}>
+              {labels[item.to] ?? item.label}
+            </span>
           </Link>
         )
       )}

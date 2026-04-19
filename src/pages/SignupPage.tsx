@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { saveWorker, setOnboarded, generateRegNumber, getWorker } from '../data/store';
+import { useT } from '../i18n/useT';
 import type { Language } from '../types';
 
 const LANGS = [
@@ -58,7 +59,16 @@ export function SignupPage() {
   const [mobile, setMobile]= useState('');
   const [types,  setTypes] = useState<string[]>([]);
   const [photo,  setPhoto] = useState(false);
+  const t = useT();
   const navigate = useNavigate();
+  // Translated step titles (re-computed when lang changes via t)
+  const stepsLabels = [
+    { title: t('signup.step0.title'), sub: t('signup.step0.sub') },
+    { title: t('signup.step1.title'), sub: t('signup.step1.sub') },
+    { title: t('signup.step2.title'), sub: t('signup.step2.sub') },
+    { title: t('signup.step3.title'), sub: t('signup.step3.sub') },
+  ];
+
 
   const next = () => setStep(s => s + 1);
   const back = () => setStep(s => s - 1);
@@ -113,17 +123,17 @@ export function SignupPage() {
           </button>
           <div style={{ fontFamily: '"DM Serif Display","Georgia",serif', fontSize: 28, color: '#fff', letterSpacing: -1 }}>Switch</div>
           <div style={{ marginLeft: 'auto', fontSize: 12, color: 'rgba(255,255,255,0.5)', fontWeight: 500 }}>
-            Step {step + 1} of {STEPS_META.length}
+            Step {step + 1} of {stepsLabels.length}
           </div>
         </div>
 
         {/* Step heading */}
         <div style={{ position: 'relative' }}>
           <div style={{ fontWeight: 800, fontSize: 26, color: '#fff', letterSpacing: -0.5, lineHeight: 1.1, marginBottom: 4 }}>
-            {STEPS_META[step].title}
+            {stepsLabels[step].title}
           </div>
           <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.55)' }}>
-            {STEPS_META[step].sub}
+            {stepsLabels[step].sub}
           </div>
         </div>
 
@@ -280,7 +290,7 @@ export function SignupPage() {
 
         {/* ─ Primary action button ─ */}
         <button
-          onClick={step === STEPS_META.length - 1 ? finish : next}
+          onClick={step === stepsLabels.length - 1 ? finish : next}
           disabled={!canNext}
           style={{
             width: '100%', height: 52, borderRadius: 14, marginTop: 8,
@@ -290,9 +300,9 @@ export function SignupPage() {
             boxShadow: canNext ? `0 4px 16px rgba(27,107,58,0.3)` : 'none',
             transition: 'all 0.2s',
           }}>
-          {step === STEPS_META.length - 1
-            ? (photo ? 'Create Account' : 'Skip & Continue')
-            : 'Continue'}
+          {step === stepsLabels.length - 1
+            ? (photo ? t('signup.createAccount') : t('signup.skipContinue'))
+            : t('common.continue')}
         </button>
 
         {/* Bottom link */}

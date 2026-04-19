@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { BottomNav }  from '../components/BottomNav';
+import { useT } from '../i18n/useT';
 import { RingMap }    from '../components/RingMap';
 import { JobCard }    from '../components/JobCard';
 import { getWorker, getJobs, getMyApplications, haversine } from '../data/store';

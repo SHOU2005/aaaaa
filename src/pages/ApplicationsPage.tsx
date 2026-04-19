@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { BottomNav } from '../components/BottomNav';
 import { getMyApplications, getJob, getCaptain, getWorker } from '../data/store';
+import { useT } from '../i18n/useT';
 import type { AppStage } from '../types';
 
 const STAGES: AppStage[] = ['Applied', 'Screening', 'Interviewed', 'Offer', 'Joined'];
@@ -39,12 +40,23 @@ export function ApplicationsPage() {
   const apps     = getMyApplications();
   const worker   = getWorker();
   const navigate = useNavigate();
+  const t = useT();
   const [expanded, setExpanded] = useState<string | null>(apps[0]?.id || null);
   const [tab, setTab] = useState('all');
 
   const activeCount  = apps.filter(a => !['Joined','Rejected'].includes(a.currentStage)).length;
   const joinedCount  = apps.filter(a => a.currentStage === 'Joined').length;
   const offeredCount = apps.filter(a => a.currentStage === 'Offer').length;
+
+  const TABS = [
+    { id: 'all',      label: t('status.tab.all') },
+    { id: 'active',   label: t('status.tab.active') },
+    { id: 'joined',   label: t('status.tab.joined') },
+    { id: 'rejected', label: t('status.tab.rejected') },
+  ];
+
+  // Stage labels translated
+  const stageLabel = (s: string) => t(`stage.${s}` as any) || s;
 
   const filtered = apps.filter(a => {
     if (tab === 'active')   return !['Joined','Rejected'].includes(a.currentStage);
@@ -74,9 +86,9 @@ export function ApplicationsPage() {
             </svg>
           </button>
           <div style={{ flex: 1 }}>
-            <div style={{ fontFamily: 'Baloo 2', fontWeight: 800, fontSize: 20, color: '#fff' }}>My Applications</div>
+            <div style={{ fontFamily: 'Baloo 2', fontWeight: 800, fontSize: 20, color: '#fff' }}>{t('status.title')}</div>
             <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)', marginTop: 1 }}>
-              {activeCount} active · {apps.length} total
+              {activeCount} {t('status.active').toLowerCase()} · {apps.length} {t('status.total').toLowerCase()}
             </div>
           </div>
           <Link to="/jobs" style={{
@@ -90,10 +102,10 @@ export function ApplicationsPage() {
         {/* Stat row */}
         <div style={{ display: 'flex', gap: 0, marginBottom: 0 }}>
           {[
-            { v: apps.length,   l: 'Applied' },
-            { v: activeCount,   l: 'Active' },
-            { v: offeredCount,  l: 'Offers' },
-            { v: joinedCount,   l: 'Joined' },
+            { v: apps.length,   l: t('status.applied') },
+            { v: activeCount,   l: t('status.active') },
+            { v: offeredCount,  l: t('status.offers') },
+            { v: joinedCount,   l: t('status.joined') },
           ].map((s, i) => (
             <div key={s.l} style={{
               flex: 1, textAlign: 'center', padding: '10px 0',
@@ -107,15 +119,15 @@ export function ApplicationsPage() {
 
         {/* Tab bar */}
         <div style={{ display: 'flex', background: 'rgba(0,0,0,0.15)', marginTop: 0 }}>
-          {TABS.map(t => (
-            <button key={t.id} onClick={() => setTab(t.id)} style={{
+          {TABS.map(t_item => (
+            <button key={t_item.id} onClick={() => setTab(t_item.id)} style={{
               flex: 1, padding: '11px 0',
               background: 'transparent', border: 'none',
-              color: tab === t.id ? '#fff' : 'rgba(255,255,255,0.45)',
-              fontWeight: tab === t.id ? 700 : 500, fontSize: 13, cursor: 'pointer',
-              borderBottom: tab === t.id ? '2px solid #fff' : '2px solid transparent',
+              color: tab === t_item.id ? '#fff' : 'rgba(255,255,255,0.45)',
+              fontWeight: tab === t_item.id ? 700 : 500, fontSize: 13, cursor: 'pointer',
+              borderBottom: tab === t_item.id ? '2px solid #fff' : '2px solid transparent',
               transition: 'all 0.2s',
-            }}>{t.label}</button>
+            }}>{t_item.label}</button>
           ))}
         </div>
       </div>
@@ -199,7 +211,7 @@ export function ApplicationsPage() {
                   {app.currentStage !== 'Rejected' && (
                     <div style={{ marginTop: 12 }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
-                        <span style={{ fontSize: 11, color: '#9CA3AF', fontWeight: 500 }}>Progress</span>
+                        <span style={{ fontSize: 11, color: '#9CA3AF', fontWeight: 500 }}>{t('status.progress')}</span>
                         <span style={{ fontSize: 11, color: meta.color, fontWeight: 700 }}>{pct}%</span>
                       </div>
                       <div style={{ display: 'flex', gap: 3 }}>
@@ -284,7 +296,7 @@ export function ApplicationsPage() {
 
                     {/* Journey timeline */}
                     <div style={{ marginBottom: 14 }}>
-                      <div style={{ fontWeight: 700, fontSize: 12, color: '#8A9A8C', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 12 }}>Application Journey</div>
+                      <div style={{ fontWeight: 700, fontSize: 12, color: '#8A9A8C', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 12 }}>{t('status.journey')}</div>
                       {STAGES.map((stage, i) => {
                         const done   = app.stages?.find(s => s.stage === stage);
                         const isAct  = stage === app.currentStage;
@@ -311,9 +323,9 @@ export function ApplicationsPage() {
                               )}
                             </div>
                             <div style={{ paddingBottom: i < STAGES.length - 1 ? 12 : 0 }}>
-                              <div style={{ fontSize: 13, fontWeight: done || isAct ? 700 : 500, color: isAct ? sm.color : (done || isPast) ? '#0D1B0F' : '#9CA3AF' }}>{sm.label}</div>
+                              <div style={{ fontSize: 13, fontWeight: done || isAct ? 700 : 500, color: isAct ? sm.color : (done || isPast) ? '#0D1B0F' : '#9CA3AF' }}>{stageLabel(stage)}</div>
                               {done && <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 1 }}>{formatDate(done.at)}</div>}
-                              {isAct && !done && <div style={{ fontSize: 11, color: sm.color, marginTop: 1 }}>In progress…</div>}
+                              {isAct && !done && <div style={{ fontSize: 11, color: sm.color, marginTop: 1 }}>{t('status.inProgress')}</div>}
                             </div>
                           </div>
                         );

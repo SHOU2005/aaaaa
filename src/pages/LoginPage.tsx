@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 // ── LoginPage — Premium redesign ───────────────────────────────────────────────
 import { useNavigate } from 'react-router-dom';
+import { useT } from '../i18n/useT';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { setOnboarded } from '../data/store';
 
@@ -11,10 +12,11 @@ export function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const t = useT();
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const sendOtp = async () => {
-    if (mobile.length !== 10) { setError('10 अंकों का सही नंबर डालें'); return; }
+    if (mobile.length !== 10) { setError(t('login.mobileLabel')); return; }
     setError(''); setLoading(true);
     if (isSupabaseConfigured()) {
       const { error: e } = await supabase.auth.signInWithOtp({ phone: `+91${mobile}` });

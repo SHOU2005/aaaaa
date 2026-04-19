@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { BottomNav } from '../components/BottomNav';
 import { getWorker, getMyApplications, saveWorker } from '../data/store';
+import { useT } from '../i18n/useT';
 import type { Worker } from '../types';
 
 const AVATAR_COLORS = ['#168448', '#2563EB', '#7C3AED', '#DC2626', '#EA580C', '#0891B2'];
@@ -49,6 +50,7 @@ function CompletionRing({ pct }: { pct: number }) {
 
 export function ProfilePage() {
   const navigate = useNavigate();
+  const t = useT();
   const worker = getWorker();
   const apps = getMyApplications();
   const placed = apps.filter(a => a.currentStage === 'Joined').length;
@@ -102,7 +104,7 @@ export function ProfilePage() {
         {/* Top bar */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
           <button onClick={() => navigate(-1)} className="icon-btn icon-btn--white" style={{ visibility: 'hidden' }}>←</button>
-          <div style={{ fontFamily: 'Baloo 2', fontWeight: 700, fontSize: 18, color: '#fff' }}>मेरा Profile</div>
+          <div style={{ fontFamily: 'Baloo 2', fontWeight: 700, fontSize: 18, color: '#fff' }}>t('profile.title')</div>
           <button onClick={() => navigate('/profile/edit')} className="icon-btn icon-btn--white">✏️</button>
         </div>
 
@@ -169,7 +171,7 @@ export function ProfilePage() {
             {/* Availability */}
             <div className="card section" style={{ padding: '14px 16px' }}>
               <div style={{ fontFamily: 'Baloo 2', fontWeight: 700, fontSize: 15, marginBottom: 12 }}>
-                🕐 Availability
+                t('profile.availability')
               </div>
               <div className="avail-grid">
                 {AVAIL_OPTS.map(o => (
@@ -184,7 +186,7 @@ export function ProfilePage() {
             {/* Skills / Job Preferences */}
             <div className="card section" style={{ padding: '14px 16px' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-                <div style={{ fontFamily: 'Baloo 2', fontWeight: 700, fontSize: 15 }}>🛠️ Skills & Preferences</div>
+                <div style={{ fontFamily: 'Baloo 2', fontWeight: 700, fontSize: 15 }}>t('profile.skills')</div>
                 <button onClick={() => navigate('/profile/edit')} style={{ border: 'none', background: 'var(--g50)', color: 'var(--g700)', fontSize: 12, fontWeight: 700, padding: '4px 10px', borderRadius: 999, cursor: 'pointer' }}>Edit</button>
               </div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
@@ -203,7 +205,7 @@ export function ProfilePage() {
             {/* Work History */}
             <div className="card section" style={{ padding: '14px 16px' }}>
               <div style={{ fontFamily: 'Baloo 2', fontWeight: 700, fontSize: 15, marginBottom: 14 }}>
-                🏆 Work History
+                t('profile.workHistory')
               </div>
               {FAKE_WORK_HISTORY.map((wh, i) => (
                 <div key={i} className="wh-item">
@@ -307,7 +309,7 @@ export function ProfilePage() {
           <div className="anim-fade">
             {/* Earnings Hero */}
             <div className="hero-stat-card section" style={{ padding: 20 }}>
-              <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', fontWeight: 500, marginBottom: 4 }}>Total Earned</div>
+              <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', fontWeight: 500, marginBottom: 4 }}>t('profile.totalEarned')</div>
               <div style={{ fontFamily: 'Baloo 2', fontWeight: 800, fontSize: 38, color: '#fff', lineHeight: 1 }}>
                 ₹{(placed * 8500).toLocaleString()}
               </div>
@@ -318,7 +320,7 @@ export function ProfilePage() {
 
             {/* Monthly Chart */}
             <div className="card section" style={{ padding: '16px 16px 8px' }}>
-              <div style={{ fontFamily: 'Baloo 2', fontWeight: 700, fontSize: 15, marginBottom: 16 }}>📈 Monthly Breakdown</div>
+              <div style={{ fontFamily: 'Baloo 2', fontWeight: 700, fontSize: 15, marginBottom: 16 }}>t('profile.monthlyBreakdown')</div>
               <div style={{ display: 'flex', gap: 6, alignItems: 'flex-end', height: 80 }}>
                 {earningsData.map((e, i) => {
                   const h = Math.max(8, Math.round((e.amount / maxEarning) * 64));
@@ -353,7 +355,7 @@ export function ProfilePage() {
 
             {/* Referral Earnings */}
             <div className="card section" style={{ padding: 16 }}>
-              <div style={{ fontFamily: 'Baloo 2', fontWeight: 700, fontSize: 15, marginBottom: 12 }}>🎁 Referral Earnings</div>
+              <div style={{ fontFamily: 'Baloo 2', fontWeight: 700, fontSize: 15, marginBottom: 12 }}>t('profile.referral')</div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
                   <div style={{ fontSize: 12, color: 'var(--text-lo)' }}>Friends Referred</div>
@@ -380,7 +382,7 @@ export function ProfilePage() {
             {/* Verification Status */}
             <div className="card section" style={{ padding: '14px 16px' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-                <div style={{ fontFamily: 'Baloo 2', fontWeight: 700, fontSize: 15 }}>🛡️ Switch Verified</div>
+                <div style={{ fontFamily: 'Baloo 2', fontWeight: 700, fontSize: 15 }}>t('profile.switchVerified')</div>
                 {worker.isVerified
                   ? <span className="badge badge-green">✓ Verified</span>
                   : <span className="badge badge-amber">⏳ Pending</span>}
@@ -406,7 +408,7 @@ export function ProfilePage() {
 
             {/* Trust Score */}
             <div className="card section" style={{ padding: 16 }}>
-              <div style={{ fontFamily: 'Baloo 2', fontWeight: 700, fontSize: 15, marginBottom: 12 }}>⭐ Trust Score</div>
+              <div style={{ fontFamily: 'Baloo 2', fontWeight: 700, fontSize: 15, marginBottom: 12 }}>t('profile.trustScore')</div>
               {[
                 { label: 'Profile Complete', pct: completionPct, color: 'var(--g700)' },
                 { label: 'Documents Uploaded', pct: DOC_ITEMS.filter(d => d.done).length / DOC_ITEMS.length * 100, color: 'var(--blue)' },

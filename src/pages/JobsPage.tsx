@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 // ── JobsPage — with Map View + List View toggle ────────────────────────────────
 import { useNavigate } from 'react-router-dom';
 import { BottomNav }  from '../components/BottomNav';
+import { useT } from '../i18n/useT';
 import { JobCard }    from '../components/JobCard';
 import { RingMap }    from '../components/RingMap';
 import { getWorker, getJobs, haversine } from '../data/store';
@@ -34,6 +35,7 @@ export function JobsPage() {
   const [sort,    setSort]    = useState('nearby');
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
   const navigate = useNavigate();
+  const t = useT();
 
   const results = useMemo(() => {
     let jobs = allJobs.map(j => ({ ...j, _d: haversine(worker.lat, worker.lng, j.lat, j.lng) }));
